@@ -971,18 +971,23 @@ function CommunityMapPreview({
   const mapRef = useRef<MapLibreMap | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
-  const visibleItems = items
-    .filter(hasFeedCoordinate)
-    .slice(0, 36);
+  const visibleItems = useMemo(
+    () => items.filter(hasFeedCoordinate).slice(0, 36),
+    [items],
+  );
   const selectedItem = visibleItems.find((item) => item.trackingCode === selectedTrackingCode) ?? visibleItems[0] ?? null;
   const feedMapData = useMemo(() => buildFeedMapFeatures(visibleItems), [visibleItems]);
 
   useEffect(() => {
     let disposed = false;
+    let initialized = false;
+    let resizeFrame: number | undefined;
+    let readyTimeout: number | undefined;
 
     async function mountMap() {
       try {
         setMapError(null);
+        setMapReady(false);
 
         if (disposed || !containerRef.current) {
           return;
@@ -995,7 +1000,7 @@ function CommunityMapPreview({
           container: containerRef.current,
           maxZoom: 18,
           minZoom: 3,
-          style: buildPublicFeedMapStyle(emptyFeedMapFeatures()),
+          style: buildPublicFeedMapStyle(feedMapData),
           zoom: 11,
         });
 
@@ -1008,6 +1013,7 @@ function CommunityMapPreview({
             return;
           }
 
+          initialized = true;
           map.resize();
           setMapReady(true);
           setMapError(null);
@@ -1021,6 +1027,7 @@ function CommunityMapPreview({
         };
 
         map.on("load", finishInitialization);
+        map.on("idle", finishInitialization);
         map.on("click", feedMapLayerIds.marker, handleMarkerClick);
         map.on("mouseenter", feedMapLayerIds.marker, () => {
           map.getCanvas().style.cursor = "pointer";
@@ -1034,12 +1041,19 @@ function CommunityMapPreview({
           }
         });
 
-        window.requestAnimationFrame(() => {
+        resizeFrame = window.requestAnimationFrame(() => {
           map.resize();
           if (map.loaded() || map.isStyleLoaded()) {
             finishInitialization();
           }
         });
+
+        readyTimeout = window.setTimeout(() => {
+          if (!initialized) {
+            finishInitialization();
+          }
+        }, 1200);
+
       } catch {
         if (!disposed) {
           setMapError("The interactive feed map could not be initialized.");
@@ -1051,10 +1065,16 @@ function CommunityMapPreview({
 
     return () => {
       disposed = true;
+      if (readyTimeout !== undefined) {
+        window.clearTimeout(readyTimeout);
+      }
+      if (resizeFrame !== undefined) {
+        window.cancelAnimationFrame(resizeFrame);
+      }
       mapRef.current?.remove();
       mapRef.current = null;
     };
-  }, [onSelect]);
+  }, [feedMapData, onSelect]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -1104,9 +1124,15 @@ function CommunityMapPreview({
       title="Community Map"
     >
       <div className="civic-map relative h-[430px] overflow-hidden rounded-lg border border-civic-border bg-[#eef6f3] shadow-sm">
-        <div className="absolute inset-0" ref={containerRef} />
+        <FeedMapFallback items={visibleItems} onSelect={onSelect} selectedTrackingCode={selectedTrackingCode} />
+        <div
+          className={`absolute inset-0 z-10 transition-opacity duration-300 ${
+            mapReady && !mapError ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          }`}
+          ref={containerRef}
+        />
 
-        <div className="pointer-events-none absolute left-3 right-3 top-3 z-10 flex flex-wrap items-start justify-between gap-2">
+        <div className="pointer-events-none absolute left-3 right-3 top-3 z-20 flex flex-wrap items-start justify-between gap-2">
           <div className="max-w-[78%] rounded-md border border-civic-border bg-civic-surface/95 p-3 shadow-sm backdrop-blur">
             <div className="flex items-center gap-2 text-sm font-semibold text-civic-heading">
               <span className="grid h-8 w-8 place-items-center rounded-md bg-civic-soft text-civic-primary">
@@ -1131,7 +1157,7 @@ function CommunityMapPreview({
         </div>
 
         {selectedItem ? (
-          <div className="absolute bottom-3 left-3 right-3 z-10 rounded-md border border-civic-border bg-civic-surface/95 p-3 shadow-sm backdrop-blur">
+          <div className="absolute bottom-3 left-3 right-3 z-20 rounded-md border border-civic-border bg-civic-surface/95 p-3 shadow-sm backdrop-blur">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-civic-heading">{formatCategory(selectedItem.category)}</p>
@@ -1145,19 +1171,19 @@ function CommunityMapPreview({
         ) : null}
 
         {!visibleItems.length ? (
-          <div className="absolute inset-0 z-20 grid place-items-center bg-civic-surface/85 p-6 text-center text-sm font-semibold text-civic-muted backdrop-blur">
+          <div className="absolute inset-0 z-30 grid place-items-center bg-civic-surface/85 p-6 text-center text-sm font-semibold text-civic-muted backdrop-blur">
             No report locations match this view yet.
           </div>
         ) : null}
 
-        {!mapReady && !mapError ? (
-          <div className="absolute inset-0 z-20 grid place-items-center bg-civic-surface/80 p-6 text-center text-sm font-semibold text-civic-muted backdrop-blur">
-            Loading interactive feed map...
+        {!mapReady && !mapError && visibleItems.length ? (
+          <div className="pointer-events-none absolute bottom-3 left-3 z-30 rounded-md border border-civic-border bg-civic-surface/90 px-3 py-2 text-xs font-semibold text-civic-muted shadow-sm backdrop-blur">
+            Preparing interactive map...
           </div>
         ) : null}
 
         {mapError ? (
-          <div className="absolute inset-0 z-20 grid place-items-center bg-civic-surface/90 p-6 text-center">
+          <div className="absolute inset-0 z-30 grid place-items-center bg-civic-surface/90 p-6 text-center">
             <div className="max-w-sm rounded-md border border-status-critical bg-status-critical/10 p-4 text-sm font-semibold text-status-critical-text">
               {mapError}
             </div>
@@ -1165,6 +1191,53 @@ function CommunityMapPreview({
         ) : null}
       </div>
     </Panel>
+  );
+}
+
+function FeedMapFallback({
+  items,
+  onSelect,
+  selectedTrackingCode,
+}: {
+  items: PublicIncidentFeedItemDto[];
+  onSelect: (trackingCode: string) => void;
+  selectedTrackingCode: string | null;
+}) {
+  const bounds = useMemo(() => computeFeedMapBounds(items), [items]);
+
+  return (
+    <div className="absolute inset-0 z-0 overflow-hidden bg-[#eaf3ef]">
+      <div className="absolute inset-0 [background-image:linear-gradient(rgba(42,129,110,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(42,129,110,0.12)_1px,transparent_1px)] [background-size:42px_42px]" />
+      <div className="absolute left-[-22%] top-[22%] h-8 w-[150%] rotate-[6deg] border-y border-civic-primary/20 bg-white/80" />
+      <div className="absolute left-[-18%] top-[58%] h-10 w-[145%] rotate-[-13deg] border-y border-civic-primary/20 bg-white/75" />
+      <div className="absolute left-[58%] top-[-14%] h-[135%] w-8 rotate-[3deg] border-x border-civic-primary/20 bg-white/75" />
+      <div className="absolute left-[28%] top-[-10%] h-[130%] w-5 rotate-[-2deg] border-x border-civic-primary/15 bg-white/60" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_48%_52%,rgba(35,123,103,0.20),transparent_30%),radial-gradient(circle_at_68%_46%,rgba(129,91,8,0.12),transparent_24%)]" />
+
+      {items.map((item) => {
+        const selected = item.trackingCode === selectedTrackingCode;
+        const position = projectFeedFallbackPoint(item, bounds);
+
+        return (
+          <button
+            aria-label={`Select ${item.trackingCode}`}
+            className={`absolute z-10 grid h-8 w-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-2 border-white text-xs font-semibold text-white shadow-md transition hover:scale-110 ${
+              selected ? "bg-civic-heading ring-4 ring-civic-primary/25" : fallbackPinClass(item.severity)
+            }`}
+            key={item.trackingCode}
+            onClick={() => onSelect(item.trackingCode)}
+            style={{ left: `${position.x}%`, top: `${position.y}%` }}
+            type="button"
+          >
+            {categoryInitial(item.category)}
+          </button>
+        );
+      })}
+
+      <div className="absolute bottom-2 right-2 rounded bg-white/90 px-2 py-1 text-[10px] font-semibold text-civic-muted shadow-sm">
+        Approximate public map
+      </div>
+    </div>
   );
 }
 
@@ -1308,13 +1381,6 @@ function buildFeedMapFeatures(items: PublicIncidentFeedItemDto[]): GeoJSON.Featu
   };
 }
 
-function emptyFeedMapFeatures(): GeoJSON.FeatureCollection<GeoJSON.Point, FeedMapFeatureProperties> {
-  return {
-    features: [],
-    type: "FeatureCollection",
-  };
-}
-
 function fitFeedMapItems(map: MapLibreMap, items: PublicIncidentFeedItemDto[]) {
   const validItems = items.filter(hasFeedCoordinate);
 
@@ -1361,6 +1427,63 @@ function hasFeedCoordinate(item: PublicIncidentFeedItemDto) {
     && Number.isFinite(item.approximateLongitude)
     && Math.abs(item.approximateLatitude) <= 90
     && Math.abs(item.approximateLongitude) <= 180;
+}
+
+function computeFeedMapBounds(items: PublicIncidentFeedItemDto[]) {
+  const validItems = items.filter(hasFeedCoordinate);
+
+  if (!validItems.length) {
+    return {
+      maxLatitude: defaultFeedMapCenter.latitude + 0.01,
+      maxLongitude: defaultFeedMapCenter.longitude + 0.01,
+      minLatitude: defaultFeedMapCenter.latitude - 0.01,
+      minLongitude: defaultFeedMapCenter.longitude - 0.01,
+    };
+  }
+
+  const latitudes = validItems.map((item) => item.approximateLatitude);
+  const longitudes = validItems.map((item) => item.approximateLongitude);
+  const minLatitude = Math.min(...latitudes);
+  const maxLatitude = Math.max(...latitudes);
+  const minLongitude = Math.min(...longitudes);
+  const maxLongitude = Math.max(...longitudes);
+  const latitudePadding = Math.max(0.002, (maxLatitude - minLatitude) * 0.22);
+  const longitudePadding = Math.max(0.002, (maxLongitude - minLongitude) * 0.22);
+
+  return {
+    maxLatitude: maxLatitude + latitudePadding,
+    maxLongitude: maxLongitude + longitudePadding,
+    minLatitude: minLatitude - latitudePadding,
+    minLongitude: minLongitude - longitudePadding,
+  };
+}
+
+function projectFeedFallbackPoint(
+  item: PublicIncidentFeedItemDto,
+  bounds: ReturnType<typeof computeFeedMapBounds>,
+) {
+  const longitudeSpan = Math.max(0.0001, bounds.maxLongitude - bounds.minLongitude);
+  const latitudeSpan = Math.max(0.0001, bounds.maxLatitude - bounds.minLatitude);
+  const x = ((item.approximateLongitude - bounds.minLongitude) / longitudeSpan) * 100;
+  const y = 100 - ((item.approximateLatitude - bounds.minLatitude) / latitudeSpan) * 100;
+
+  return {
+    x: Math.min(88, Math.max(12, x)),
+    y: Math.min(84, Math.max(16, y)),
+  };
+}
+
+function fallbackPinClass(severity: string) {
+  switch (normalizeSeverity(severity)) {
+    case "Critical":
+      return "bg-status-critical-text";
+    case "High":
+      return "bg-civic-primary";
+    case "Medium":
+      return "bg-status-review-text";
+    default:
+      return "bg-status-approved-text";
+  }
 }
 
 function PostInfo({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
