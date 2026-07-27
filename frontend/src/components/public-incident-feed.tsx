@@ -347,22 +347,28 @@ function PublicFeedHero({
     <section className="relative overflow-hidden rounded-lg border border-civic-border bg-civic-surface shadow-sm">
       <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(rgba(42,129,110,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(42,129,110,0.08)_1px,transparent_1px)] [background-size:42px_42px]" />
       <div className="absolute inset-x-0 bottom-0 h-24 border-t border-civic-border bg-civic-soft/50" />
-      <div className="relative grid gap-6 p-5 lg:grid-cols-[1.1fr_0.9fr] lg:p-6">
-        <div className="flex min-h-[330px] flex-col justify-between">
+      <div className="relative grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:p-6">
+        <div className="flex flex-col justify-between gap-6">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-civic-border bg-civic-surface px-3 py-1.5 text-xs font-semibold text-civic-primary shadow-sm">
               <Activity className="h-4 w-4" aria-hidden="true" />
               Resident signal
             </div>
-            <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight text-civic-heading sm:text-5xl">
+            <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight text-civic-heading sm:text-5xl">
               Public Incident Feed
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-civic-muted">
+            <p className="mt-3 max-w-2xl text-base leading-7 text-civic-muted">
               Live community reports, public status, approximate locations, and AI-assisted routing signals.
             </p>
+
+            <div className="mt-5 grid max-w-2xl gap-3 sm:grid-cols-3">
+              <HeroStat icon={<Layers className="h-4 w-4" aria-hidden="true" />} label="Reports" value={items.length} />
+              <HeroStat icon={<Route className="h-4 w-4" aria-hidden="true" />} label="Open" value={summary.open} />
+              <HeroStat icon={<FileImage className="h-4 w-4" aria-hidden="true" />} label="Media" value={summary.media} />
+            </div>
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2">
             <Link
               className="inline-flex h-12 items-center justify-center gap-2 rounded-md bg-civic-primary px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-civic-primary-strong"
               href="/public/report"
@@ -1000,7 +1006,7 @@ function CommunityMapPreview({
           container: containerRef.current,
           maxZoom: 18,
           minZoom: 3,
-          style: buildPublicFeedMapStyle(feedMapData),
+          style: buildPublicFeedMapStyle(buildFeedMapFeatures([])),
           zoom: 11,
         });
 
@@ -1037,7 +1043,7 @@ function CommunityMapPreview({
         });
         map.on("error", (event) => {
           if (!disposed && !map.loaded()) {
-            setMapError(event.error?.message ?? "The interactive feed map could not be initialized.");
+            setMapError(event.error?.message ?? "Interactive map unavailable; showing the fallback map.");
           }
         });
 
@@ -1074,7 +1080,7 @@ function CommunityMapPreview({
       mapRef.current?.remove();
       mapRef.current = null;
     };
-  }, [feedMapData, onSelect]);
+  }, [onSelect]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -1123,7 +1129,7 @@ function CommunityMapPreview({
       description="Approximate public locations; exact report positions are privacy-protected."
       title="Community Map"
     >
-      <div className="civic-map relative h-[430px] overflow-hidden rounded-lg border border-civic-border bg-[#eef6f3] shadow-sm">
+      <div className="civic-map relative h-[360px] overflow-hidden rounded-lg border border-civic-border bg-[#eef6f3] shadow-sm sm:h-[400px]">
         <FeedMapFallback items={visibleItems} onSelect={onSelect} selectedTrackingCode={selectedTrackingCode} />
         <div
           className={`absolute inset-0 z-10 transition-opacity duration-300 ${
@@ -1176,17 +1182,9 @@ function CommunityMapPreview({
           </div>
         ) : null}
 
-        {!mapReady && !mapError && visibleItems.length ? (
-          <div className="pointer-events-none absolute bottom-3 left-3 z-30 rounded-md border border-civic-border bg-civic-surface/90 px-3 py-2 text-xs font-semibold text-civic-muted shadow-sm backdrop-blur">
-            Preparing interactive map...
-          </div>
-        ) : null}
-
         {mapError ? (
-          <div className="absolute inset-0 z-30 grid place-items-center bg-civic-surface/90 p-6 text-center">
-            <div className="max-w-sm rounded-md border border-status-critical bg-status-critical/10 p-4 text-sm font-semibold text-status-critical-text">
-              {mapError}
-            </div>
+          <div className="pointer-events-none absolute bottom-3 left-3 z-30 max-w-[70%] rounded-md border border-civic-border bg-civic-surface/90 px-3 py-2 text-xs font-semibold text-civic-muted shadow-sm backdrop-blur">
+            {mapError}
           </div>
         ) : null}
       </div>
