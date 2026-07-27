@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#237b67" />
+    <title>CivicSignal Offline</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body {
+        background: #f6f8f7;
+        color: #17211d;
+        margin: 0;
+        min-height: 100vh;
+      }
+
+      main {
+        display: grid;
+        margin: 0 auto;
+        max-width: 720px;
+        min-height: 100vh;
+        padding: 24px;
+        place-items: center;
+      }
+
+      section {
+        background: #ffffff;
+        border: 1px solid #d7e0db;
+        border-radius: 8px;
+        box-shadow: 0 12px 32px rgba(17, 24, 21, 0.08);
+        padding: 28px;
+      }
+
+      .mark {
+        align-items: center;
+        background: #237b67;
+        border-radius: 8px;
+        color: #ffffff;
+        display: inline-flex;
+        font-size: 24px;
+        font-weight: 700;
+        height: 48px;
+        justify-content: center;
+        margin-bottom: 20px;
+        width: 48px;
+      }
+
+      h1 {
+        color: #111815;
+        font-size: clamp(28px, 7vw, 44px);
+        line-height: 1.05;
+        margin: 0;
+      }
+
+      p {
+        color: #586b63;
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 14px 0 0;
+      }
+
+      a {
+        align-items: center;
+        background: #237b67;
+        border-radius: 6px;
+        color: #ffffff;
+        display: inline-flex;
+        font-weight: 700;
+        margin-top: 22px;
+        min-height: 44px;
+        padding: 0 16px;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section>
+        <div class="mark">CS</div>
+        <h1>You are offline</h1>
+        <p>
+          CivicSignal can still protect your in-progress report draft on this device. Reconnect to submit the report,
+          upload evidence, or load live status from the API.
+        </p>
+        <a href="/public/report">Return to saved report</a>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "img-001",
+    "filePath": "media/images/road-damage-pothole.ppm",
+    "contentType": "image/x-portable-pixmap",
+    "fixture": "road_damage_pothole",
+    "reviewedFinding": "Large pothole and cracked asphalt on a roadway.",
+    "expectedLabels": ["RoadDamage"],
+    "predictedLabels": ["RoadDamage"],
+    "humanAccepted": true,
+    "unsupportedPredictions": []
+  },
+  {
+    "id": "img-002",
+    "filePath": "media/images/flooding-standing-water.ppm",
+    "contentType": "image/x-portable-pixmap",
+    "fixture": "flooding_standing_water",
+    "reviewedFinding": "Standing water around a blocked storm drain.",
+    "expectedLabels": ["Flooding"],
+    "predictedLabels": ["Flooding"],
+    "humanAccepted": true,
+    "unsupportedPredictions": []
+  },
+  {
+    "id": "img-003",
+    "filePath": "media/images/streetlight-outage.ppm",
+    "contentType": "image/x-portable-pixmap",
+    "fixture": "streetlight_outage",
+    "reviewedFinding": "Streetlight fixture is not illuminated.",
+    "expectedLabels": ["Streetlight"],
+    "predictedLabels": ["Streetlight"],
+    "humanAccepted": true,
+    "unsupportedPredictions": []
+  },
+  {
+    "id": "img-004",
+    "filePath": "media/images/sanitation-illegal-dumping.ppm",
+    "contentType": "image/x-portable-pixmap",
+    "fixture": "sanitation_illegal_dumping",
+    "reviewedFinding": "Trash bags and boxes dumped in public space.",
+    "expectedLabels": ["Sanitation"],
+    "predictedLabels": ["Sanitation"],
+    "humanAccepted": true,
+    "unsupportedPredictions": []
+  },
+  {
+    "id": "img-005",
+    "filePath": "media/images/tree-hazard-fallen-branch.ppm",
+    "contentType": "image/x-portable-pixmap",
+    "fixture": "tree_hazard_fallen_branch",
+    "reviewedFinding": "Fallen branch blocking a pedestrian path.",
+    "expectedLabels": ["TreeHazard"],
+    "predictedLabels": ["TreeHazard"],
+    "humanAccepted": true,
+    "unsupportedPredictions": []
+  }
+]

@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CivicSignal.Api/CivicSignal.Api.csproj" />
+    <Project Path="src/CivicSignal.Application/CivicSignal.Application.csproj" />
+    <Project Path="src/CivicSignal.Domain/CivicSignal.Domain.csproj" />
+    <Project Path="src/CivicSignal.Infrastructure/CivicSignal.Infrastructure.csproj" />
+    <Project Path="src/CivicSignal.Worker/CivicSignal.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CivicSignal.Api.IntegrationTests/CivicSignal.Api.IntegrationTests.csproj" />
+    <Project Path="tests/CivicSignal.Application.Tests/CivicSignal.Application.Tests.csproj" />
+    <Project Path="tests/CivicSignal.Architecture.Tests/CivicSignal.Architecture.Tests.csproj" />
+    <Project Path="tests/CivicSignal.Domain.Tests/CivicSignal.Domain.Tests.csproj" />
+    <Project Path="tests/CivicSignal.Infrastructure.IntegrationTests/CivicSignal.Infrastructure.IntegrationTests.csproj" />
+    <Project Path="tests/CivicSignal.Worker.Tests/CivicSignal.Worker.Tests.csproj" />
+  </Folder>
+</Solution>

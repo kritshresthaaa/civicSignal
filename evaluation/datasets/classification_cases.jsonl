@@ -1,0 +1,27 @@
+{"id":"cls-001","text":"There is a large pothole in the right lane and cars are swerving around it.","category":"RoadDamage","severity":"High","agency":"DOT"}
+{"id":"cls-002","text":"Small road crack forming in front of the library entrance.","category":"RoadDamage","severity":"Low","agency":"DOT"}
+{"id":"cls-003","text":"A deep sinkhole opened near the bus stop and the lane is collapsing.","category":"RoadDamage","severity":"Critical","agency":"DOT"}
+{"id":"cls-004","text":"The curb ramp is broken and wheelchair users cannot get across safely.","category":"RoadDamage","severity":"Medium","agency":"DOT"}
+{"id":"cls-005","text":"Fresh asphalt patch failed and street damage is spreading across the block.","category":"RoadDamage","severity":"Medium","agency":"DOT"}
+{"id":"cls-006","text":"Blocked storm drain is causing standing water across the intersection.","category":"Flooding","severity":"High","agency":"WATER"}
+{"id":"cls-007","text":"Water leak from a city pipe is flooding the sidewalk.","category":"Flooding","severity":"Medium","agency":"WATER"}
+{"id":"cls-008","text":"Major flood water is covering both lanes after heavy rain.","category":"Flooding","severity":"High","agency":"WATER"}
+{"id":"cls-009","text":"Drain grate is clogged and water is pooling near the crosswalk.","category":"Flooding","severity":"Medium","agency":"WATER"}
+{"id":"cls-010","text":"Streetlight is out near the school entrance and the area is dark.","category":"Streetlight","severity":"Medium","agency":"UTILITIES"}
+{"id":"cls-011","text":"Traffic light is stuck on red at the corner of Pine and 3rd.","category":"Streetlight","severity":"Medium","agency":"UTILITIES"}
+{"id":"cls-012","text":"A lamp pole is sparking and looks dangerous after the storm.","category":"Streetlight","severity":"High","agency":"UTILITIES"}
+{"id":"cls-013","text":"Traffic signal is blinking red and confusing drivers during rush hour.","category":"Streetlight","severity":"Medium","agency":"UTILITIES"}
+{"id":"cls-014","text":"Trash bags and garbage have been dumped behind the grocery store.","category":"Sanitation","severity":"Medium","agency":"SANITATION"}
+{"id":"cls-015","text":"Construction debris is blocking the alley entrance.","category":"Sanitation","severity":"High","agency":"SANITATION"}
+{"id":"cls-016","text":"Illegal dumping of old furniture on the sidewalk.","category":"Sanitation","severity":"Medium","agency":"SANITATION"}
+{"id":"cls-017","text":"Overflowing litter bins are attracting complaints in the plaza.","category":"Sanitation","severity":"Medium","agency":"SANITATION"}
+{"id":"cls-018","text":"Graffiti covers the public wall next to the subway stairs.","category":"Graffiti","severity":"Medium","agency":"PUBLICWORKS"}
+{"id":"cls-019","text":"Spray paint tags were added to the bridge overnight.","category":"Graffiti","severity":"Medium","agency":"PUBLICWORKS"}
+{"id":"cls-020","text":"Vandalism on the park sign includes offensive writing.","category":"Graffiti","severity":"Medium","agency":"PUBLICWORKS"}
+{"id":"cls-021","text":"A fallen tree branch is blocking half of the walking path.","category":"TreeHazard","severity":"High","agency":"PARKS"}
+{"id":"cls-022","text":"Large tree limb came down and is leaning on a parked car.","category":"TreeHazard","severity":"High","agency":"PARKS"}
+{"id":"cls-023","text":"Broken branch hanging over the playground after high winds.","category":"TreeHazard","severity":"Medium","agency":"PARKS"}
+{"id":"cls-024","text":"Tree roots lifted pavement near the playground gate.","category":"TreeHazard","severity":"Medium","agency":"PARKS"}
+{"id":"cls-025","text":"Resident has a general question about a city service request.","category":"GeneralIncident","severity":"Medium","agency":"CITYOPS"}
+{"id":"cls-026","text":"Noise complaint about loud music from a storefront late at night.","category":"GeneralIncident","severity":"Medium","agency":"CITYOPS"}
+{"id":"cls-027","text":"Missing public notice sign after maintenance work last week.","category":"GeneralIncident","severity":"Medium","agency":"CITYOPS"}

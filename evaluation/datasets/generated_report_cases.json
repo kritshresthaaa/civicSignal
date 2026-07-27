@@ -1,0 +1,47 @@
+[
+  {
+    "id": "rep-001",
+    "requiredFields": ["incidentType", "agency", "urgency", "location", "summary"],
+    "report": {
+      "incidentType": "RoadDamage",
+      "agency": "DOT",
+      "urgency": "High",
+      "location": "Pine Street and 3rd Avenue",
+      "summary": "Large pothole forcing cars to swerve."
+    },
+    "expectedFacts": ["RoadDamage", "DOT", "High", "Pine Street", "pothole"],
+    "reportText": "RoadDamage report for DOT at Pine Street and 3rd Avenue. High urgency because a large pothole is forcing cars to swerve.",
+    "unsupportedClaims": [],
+    "reviewerAccepted": true
+  },
+  {
+    "id": "rep-002",
+    "requiredFields": ["incidentType", "agency", "urgency", "location", "summary"],
+    "report": {
+      "incidentType": "Flooding",
+      "agency": "WATER",
+      "urgency": "Medium",
+      "location": "Market Street and 8th Avenue",
+      "summary": "Standing water from a blocked storm drain."
+    },
+    "expectedFacts": ["Flooding", "WATER", "Medium", "Market Street", "storm drain"],
+    "reportText": "Flooding report for WATER at Market Street and 8th Avenue. Medium urgency due to standing water from a blocked storm drain.",
+    "unsupportedClaims": [],
+    "reviewerAccepted": true
+  },
+  {
+    "id": "rep-003",
+    "requiredFields": ["incidentType", "agency", "urgency", "location", "summary"],
+    "report": {
+      "incidentType": "Streetlight",
+      "agency": "UTILITIES",
+      "urgency": "Medium",
+      "location": "Cedar Road school crosswalk",
+      "summary": ""
+    },
+    "expectedFacts": ["Streetlight", "UTILITIES", "Medium", "Cedar Road", "crosswalk"],
+    "reportText": "Streetlight report for UTILITIES at Cedar Road school crosswalk. A crew has already been dispatched.",
+    "unsupportedClaims": ["A crew has already been dispatched."],
+    "reviewerAccepted": false
+  }
+]

@@ -1,0 +1,147 @@
+@CivicSignal.Api_HostAddress = http://localhost:5020
+@AccessToken = paste-access-token-here
+@AdminEmail = admin@civicsignal.local
+@AdminPassword = Admin123456!
+@OperatorEmail = operator@civicsignal.local
+@OperatorPassword = Operator123456!
+
+POST {{CivicSignal.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "reporter@example.com",
+  "password": "Reporter123",
+  "displayName": "Local Reporter"
+}
+
+###
+
+POST {{CivicSignal.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{OperatorEmail}}",
+  "password": "{{OperatorPassword}}"
+}
+
+###
+
+GET {{CivicSignal.Api_HostAddress}}/api/auth/me
+Authorization: Bearer {{AccessToken}}
+Accept: application/json
+
+###
+
+GET {{CivicSignal.Api_HostAddress}}/api/incidents
+Accept: application/json
+
+###
+
+POST {{CivicSignal.Api_HostAddress}}/api/incidents
+Content-Type: application/json
+
+{
+  "description": "Large pothole near Main Street",
+  "latitude": 40.7128,
+  "longitude": -74.0060
+}
+
+###
+
+GET {{CivicSignal.Api_HostAddress}}/api/incidents/00000000-0000-0000-0000-000000000000/status
+Accept: application/json
+
+###
+
+POST {{CivicSignal.Api_HostAddress}}/api/incidents/00000000-0000-0000-0000-000000000000/media/upload
+Content-Type: multipart/form-data; boundary=UploadBoundary
+
+--UploadBoundary
+Content-Disposition: form-data; name="file"; filename="main-street-pothole.jpg"
+Content-Type: image/jpeg
+
+< ./sample-media/main-street-pothole.jpg
+--UploadBoundary--
+
+###
+
+POST {{CivicSignal.Api_HostAddress}}/api/incidents/00000000-0000-0000-0000-000000000000/media
+Content-Type: application/json
+
+{
+  "fileName": "main-street-pothole.jpg",
+  "contentType": "image/jpeg",
+  "storageUri": "placeholder://incident-media/main-street-pothole.jpg"
+}
+
+###
+
+POST {{CivicSignal.Api_HostAddress}}/api/incidents/00000000-0000-0000-0000-000000000000/analyze
+Authorization: Bearer {{AccessToken}}
+Accept: application/json
+
+###
+
+GET {{CivicSignal.Api_HostAddress}}/api/incidents/00000000-0000-0000-0000-000000000000/prediction
+Accept: application/json
+
+###
+
+GET {{CivicSignal.Api_HostAddress}}/api/incidents/00000000-0000-0000-0000-000000000000/duplicates
+Accept: application/json
+
+###
+
+GET {{CivicSignal.Api_HostAddress}}/api/incidents/00000000-0000-0000-0000-000000000000/similar
+Accept: application/json
+
+###
+
+POST {{CivicSignal.Api_HostAddress}}/api/incidents/00000000-0000-0000-0000-000000000000/processing-status
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+  "stepName": "MediaAnalysis",
+  "status": "InProgress",
+  "errorMessage": null
+}
+
+###
+
+POST {{CivicSignal.Api_HostAddress}}/api/incidents/00000000-0000-0000-0000-000000000000/review
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+  "decision": "Approved",
+  "note": "Confirmed by reviewer.",
+  "correctedCategory": "RoadDamage",
+  "correctedAgencyCode": "DOT",
+  "correctedSeverity": "High",
+  "duplicateOfIncidentId": null,
+  "acceptedPrediction": true
+}
+
+###
+
+GET {{CivicSignal.Api_HostAddress}}/api/incidents/00000000-0000-0000-0000-000000000000/reviews
+Authorization: Bearer {{AccessToken}}
+Accept: application/json
+
+###
+
+GET {{CivicSignal.Api_HostAddress}}/swagger/v1/swagger.json
+Accept: application/json
+
+###
+
+GET {{CivicSignal.Api_HostAddress}}/health
+Accept: application/json
+
+###
+
+GET {{CivicSignal.Api_HostAddress}}/health/ready
+Accept: application/json
+
+###

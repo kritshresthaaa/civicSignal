@@ -1,0 +1,52 @@
+[
+  {
+    "id": "aud-001",
+    "filePath": "media/audio/large-pothole-crosswalk.wav",
+    "contentType": "audio/wav",
+    "referenceTranscript": "There is a large pothole near the school crosswalk and cars are swerving.",
+    "predictedTranscript": "There is a large pothole near the school crosswalk and cars are swerving.",
+    "expectedLanguage": "en",
+    "predictedLanguage": "en",
+    "latencyMilliseconds": 920
+  },
+  {
+    "id": "aud-002",
+    "filePath": "media/audio/blocked-storm-drain.wav",
+    "contentType": "audio/wav",
+    "referenceTranscript": "Water is pooling around the blocked storm drain.",
+    "predictedTranscript": "Water is pooling around the block storm drain.",
+    "expectedLanguage": "en",
+    "predictedLanguage": "en",
+    "latencyMilliseconds": 1040
+  },
+  {
+    "id": "aud-003",
+    "filePath": "media/audio/streetlight-outage.wav",
+    "contentType": "audio/wav",
+    "referenceTranscript": "The streetlight outside my apartment is out.",
+    "predictedTranscript": "The street light outside my apartment is out.",
+    "expectedLanguage": "en",
+    "predictedLanguage": "en",
+    "latencyMilliseconds": 875
+  },
+  {
+    "id": "aud-004",
+    "filePath": "media/audio/dumped-trash-grocery-store.wav",
+    "contentType": "audio/wav",
+    "referenceTranscript": "Trash bags were dumped behind the grocery store overnight.",
+    "predictedTranscript": "Trash bags were dumped behind the grocery store.",
+    "expectedLanguage": "en",
+    "predictedLanguage": "en",
+    "latencyMilliseconds": 1180
+  },
+  {
+    "id": "aud-005",
+    "filePath": "media/audio/fallen-tree-branch-playground.wav",
+    "contentType": "audio/wav",
+    "referenceTranscript": "A tree branch is hanging over the playground.",
+    "predictedTranscript": "A tree branch is hanging over the play ground.",
+    "expectedLanguage": "en",
+    "predictedLanguage": "en",
+    "latencyMilliseconds": 990
+  }
+]

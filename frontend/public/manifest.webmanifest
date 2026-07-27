@@ -1,0 +1,52 @@
+{
+  "id": "/public/report",
+  "name": "CivicSignal AI",
+  "short_name": "CivicSignal",
+  "description": "Mobile-first city incident reporting and AI-assisted operations dashboard.",
+  "lang": "en-US",
+  "dir": "ltr",
+  "start_url": "/public/report",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "background_color": "#f6f8f7",
+  "theme_color": "#237b67",
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "utilities", "government"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Report Issue",
+      "short_name": "Report",
+      "description": "Create a new city incident report.",
+      "url": "/public/report",
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Track Status",
+      "short_name": "Status",
+      "description": "Check a submitted report.",
+      "url": "/public/status",
+      "icons": [
+        {
+          "src": "/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
+}

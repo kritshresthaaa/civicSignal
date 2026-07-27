@@ -1,0 +1,1451 @@
+# CivicSignal AI
+
+> A responsive web and Progressive Web App (PWA) for multimodal city incident reporting, AI-assisted triage, and operations monitoring.
+
+CivicSignal AI is a portfolio-grade AI engineering project designed for the 2026 software and AI job market. The first version is a mobile-friendly Next.js web application that can also be installed as a Progressive Web App (PWA). It goes beyond a basic chatbot by combining multimodal Hugging Face models, real-world public data, geospatial search, duplicate detection, human review, evaluation, observability, and scalable backend architecture.
+
+The system is designed for non-emergency city service reports such as potholes, broken streetlights, illegal dumping, graffiti, flooding, damaged road signs, sidewalk problems, and noise complaints.
+
+---
+
+## Table of Contents
+
+- [Project Overview](#project-overview)
+- [Platform Experience](#platform-experience)
+- [Problem](#problem)
+- [Solution](#solution)
+- [Example Workflow](#example-workflow)
+- [Core Features](#core-features)
+- [Hugging Face Tasks](#hugging-face-tasks)
+- [Recommended Models](#recommended-models)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Repository Structure](#repository-structure)
+- [Data Sources and APIs](#data-sources-and-apis)
+- [Machine Learning Pipeline](#machine-learning-pipeline)
+- [Agent Workflow](#agent-workflow)
+- [Human Review and Safety](#human-review-and-safety)
+- [Learning Goals](#learning-goals)
+- [Development Roadmap](#development-roadmap)
+- [Evaluation Metrics](#evaluation-metrics)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [API Design](#api-design)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Resume Value](#resume-value)
+- [Future Improvements](#future-improvements)
+- [License](#license)
+
+---
+
+## Project Overview
+
+CivicSignal AI accepts one or more of the following:
+
+- A written complaint
+- A photo of the issue
+- A recorded voice message
+- A location or map coordinate
+- A supporting document
+
+It then:
+
+1. Transcribes voice reports.
+2. Analyzes uploaded images.
+3. Classifies the incident.
+4. Extracts important entities such as location, date, and issue type.
+5. Finds similar nearby reports.
+6. Estimates whether the report is a duplicate.
+7. Predicts the responsible city department.
+8. Assigns urgency and confidence.
+9. Generates a structured incident summary.
+10. Sends uncertain cases to a human reviewer.
+
+The platform also includes a city operations dashboard for complaint trends, geographic clusters, service-level risk, model performance, and projected complaint volume.
+
+---
+
+## Platform Experience
+
+CivicSignal AI is initially built as a **responsive web application and Progressive Web App**, not as a native iOS or Android application.
+
+It provides two connected experiences:
+
+### Citizen Reporting PWA
+
+The citizen-facing interface is designed for phones first, but also works on tablets and computers. Users can:
+
+- Take or upload a photo using the phone camera
+- Record or upload a voice description
+- Enter a written complaint
+- Share their current location with permission
+- Review the AI-generated report before submission
+- Track the processing and review status
+- Install the website on their home screen
+- Use selected cached screens when network quality is poor
+
+The PWA uses normal browser capabilities such as:
+
+- Camera and file upload APIs
+- Microphone and audio recording APIs
+- Geolocation API
+- Service workers
+- Web app manifest
+- Push notifications, as a later extension
+
+### City Operations Dashboard
+
+The staff-facing interface is optimized for laptops and desktop screens. It provides:
+
+- Human-review queues
+- Incident maps and geographic clusters
+- Duplicate-report review
+- Agency routing recommendations
+- Evidence and confidence inspection
+- Forecasting and workload analytics
+- Model performance monitoring
+- Audit history and reviewer corrections
+
+### Why Start With a PWA?
+
+A PWA keeps the first three-month scope realistic while still providing a mobile-app-like experience. The same frontend codebase supports both citizen reporting and the operations dashboard.
+
+A native mobile client using Flutter or React Native can be added later if the project needs deeper offline support, background uploads, or platform-specific device features.
+
+---
+
+## Problem
+
+City service-request systems often receive incomplete, duplicated, or poorly categorized reports.
+
+Common problems include:
+
+- Citizens describing the same issue in different ways
+- Multiple reports for the same incident
+- Incorrect routing to city departments
+- Missing location details
+- Large volumes of unstructured text
+- Delays caused by manual triage
+- Limited visibility into complaint trends
+- AI systems that provide predictions without evidence
+
+A simple classification model is not enough. A useful system must combine language, images, audio, geography, historical data, uncertainty, and human oversight.
+
+---
+
+## Solution
+
+CivicSignal AI provides a structured multimodal workflow that combines:
+
+- Speech recognition
+- Computer vision
+- Natural language processing
+- Semantic search
+- Geospatial search
+- Time-series forecasting
+- Retrieval-augmented generation
+- Human-in-the-loop review
+- Background job processing
+- Model evaluation and monitoring
+
+The goal is not to replace city workers. The goal is to help them process reports faster while making each prediction explainable and reviewable.
+
+---
+
+## Example Workflow
+
+A resident uploads:
+
+- A photo showing damaged pavement
+- A voice message saying:  
+  _“There is a large pothole near the intersection, and cars are swerving around it.”_
+- Their approximate location
+
+The system returns:
+
+```json
+{
+  "incidentType": "Street Condition",
+  "subtype": "Pothole",
+  "recommendedAgency": "Department of Transportation",
+  "urgency": "High",
+  "confidence": 0.91,
+  "possibleDuplicate": true,
+  "duplicateCaseId": "CASE-28419",
+  "distanceFromDuplicateMeters": 42,
+  "evidence": {
+    "visualDetection": "road surface damage",
+    "transcriptKeywords": [
+      "large pothole",
+      "cars swerving"
+    ]
+  },
+  "requiresHumanReview": false
+}
+```
+
+The report can then be reviewed, corrected, or submitted to a simulated city work-order system.
+
+---
+
+## Core Features
+
+### Mobile-Friendly Citizen PWA
+
+The citizen portal is designed for one-handed use on a phone and can be installed from a supported browser. It includes:
+
+- Large touch-friendly controls
+- Camera capture
+- Voice recording
+- Location permission handling
+- Upload progress
+- Draft recovery
+- Accessible form validation
+- Processing-status updates
+- Responsive layouts for mobile, tablet, and desktop
+
+### Desktop Operations Dashboard
+
+City staff receive a separate dashboard layout for reviewing and managing reports. It includes map-based filtering, evidence inspection, reviewer corrections, analytics, and system-health views.
+
+### Multimodal Incident Submission
+
+Users can create reports using:
+
+- Text
+- Images
+- Audio
+- Location
+- Documents
+
+### Automatic Speech Recognition
+
+Recorded complaints are converted into text and passed into the same triage pipeline as typed reports.
+
+### Image Understanding
+
+The system identifies visible infrastructure problems such as:
+
+- Potholes
+- Garbage
+- Graffiti
+- Flooded roads
+- Broken signs
+- Damaged sidewalks
+- Fallen trees
+- Streetlight issues
+
+### Incident Classification
+
+The platform predicts:
+
+- Complaint category
+- Complaint subtype
+- Responsible agency
+- Urgency
+- Confidence
+- Human-review requirement
+
+### Duplicate Detection
+
+Potential duplicates are detected using:
+
+- Text similarity
+- Image similarity
+- Geographic distance
+- Time difference
+
+A possible scoring formula:
+
+```text
+duplicate_score =
+    0.50 × text_similarity
+  + 0.20 × image_similarity
+  + 0.20 × geographic_proximity
+  + 0.10 × time_proximity
+```
+
+The weights can later be learned from labeled data.
+
+### Evidence-Backed Predictions
+
+Every prediction should include supporting evidence.
+
+Example:
+
+```text
+Predicted category: Pothole
+
+Evidence:
+- Image model detected road surface damage
+- Transcript contains “large pothole”
+- Four similar reports occurred within 100 meters
+- Historical records show that similar cases were handled by transportation services
+```
+
+### Human Review Dashboard
+
+Reviewers can:
+
+- Correct the complaint category
+- Correct the assigned agency
+- Mark reports as duplicates
+- Approve or reject summaries
+- Review low-confidence cases
+- Submit model feedback
+
+### Map and Operations Dashboard
+
+The dashboard can display:
+
+- Incident locations
+- Heat maps
+- Complaint clusters
+- Category trends
+- Agency workload
+- Duplicate-report patterns
+- Model confidence
+- Predicted complaint volume
+- Service-level risk
+
+### Real-Time Processing Status
+
+SignalR can display live status updates:
+
+```text
+Complaint received
+→ Audio transcribed
+→ Image analyzed
+→ Similar cases searched
+→ Triage completed
+```
+
+### Model and Prompt Versioning
+
+Each prediction should store:
+
+```text
+model_name
+model_version
+prompt_version
+prediction
+confidence
+processing_time
+reviewer_correction
+```
+
+### Graceful Fallbacks
+
+If one model is unavailable, the system should continue when possible.
+
+Examples:
+
+- If image analysis fails, process text and audio.
+- If audio transcription fails, keep the uploaded audio for review.
+- If the generation model is unavailable, return structured classifier output.
+- If confidence is low, require human review.
+
+---
+
+## Hugging Face Tasks
+
+| Hugging Face task | Use in CivicSignal AI |
+|---|---|
+| Automatic Speech Recognition | Convert voice complaints into text |
+| Image-Text-to-Text | Generate structured descriptions of incident images |
+| Zero-Shot Image Classification | Classify visual problems without training a model for every class |
+| Zero-Shot Object Detection | Locate objects and hazards in uploaded images |
+| Text Classification | Predict category, department, urgency, and priority |
+| Token Classification | Extract locations, dates, agencies, and issue-related entities |
+| Sentence Similarity | Find duplicate or related complaints |
+| Feature Extraction | Create embeddings for retrieval and clustering |
+| Summarization | Produce short incident reports and daily summaries |
+| Document Question Answering | Answer questions from city policies and service documents |
+| Time-Series Forecasting | Predict complaint volume and workload spikes |
+
+The first usable version should focus on five main tasks:
+
+1. Automatic Speech Recognition
+2. Image-Text-to-Text or Zero-Shot Image Classification
+3. Text Classification
+4. Sentence Similarity
+5. Feature Extraction
+
+---
+
+## Recommended Models
+
+These are suggested starting points and can be changed based on cost, latency, licensing, and hardware.
+
+### Audio
+
+- `openai/whisper-small`
+- `openai/whisper-large-v3-turbo`
+
+Use a smaller checkpoint during local development and a larger model for deployment testing.
+
+### Image Understanding
+
+- `Qwen/Qwen2.5-VL-7B-Instruct`
+- SigLIP2-based zero-shot image classifiers
+- OWLv2
+- Grounding DINO
+
+### Text Classification
+
+Start with multiple baselines:
+
+- Embedding plus linear classifier
+- Logistic regression with TF-IDF
+- DistilBERT
+- DeBERTa
+- Zero-shot classification model
+
+### Embeddings and Similarity
+
+- `BAAI/bge-m3`
+- Sentence Transformers models
+- Smaller MiniLM-based models for fast local testing
+
+### Forecasting
+
+Start with standard baselines:
+
+- Moving average
+- Linear regression
+- XGBoost
+- Prophet-style forecasting
+
+Then compare them with a Hugging Face time-series model.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TD
+    A[Citizen PWA<br/>Phone, Tablet, Desktop] --> C[ASP.NET Core API]
+    B[Operations Dashboard<br/>Desktop First] --> C
+
+    C --> D[PostgreSQL + PostGIS + pgvector]
+    C --> E[Object Storage]
+    C --> F[Redis Cache]
+    C --> G[Message Queue]
+
+    G --> H[Audio Worker]
+    G --> I[Vision Worker]
+    G --> J[NLP and Triage Worker]
+    G --> K[Forecasting Worker]
+
+    H --> L[Whisper Model]
+    I --> M[Vision-Language Model]
+    J --> N[Classifier and Embedding Models]
+    K --> O[Forecasting Models]
+
+    H --> D
+    I --> D
+    J --> D
+    K --> D
+
+    C --> P[SignalR Processing Updates]
+    P --> A
+    P --> B
+
+    B --> Q[Human Review Workflow]
+    Q --> C
+```
+
+### Initial Deployment Strategy
+
+Do not begin with many independent microservices.
+
+Start with:
+
+- One ASP.NET Core API
+- One Python AI service
+- One worker process
+- One PostgreSQL database
+- One Redis instance
+- One message queue
+
+Split services only when load testing shows that independent scaling is useful.
+
+---
+
+## Tech Stack
+
+### Frontend and PWA
+
+- Next.js
+- TypeScript
+- Tailwind CSS
+- TanStack Query
+- Responsive, mobile-first layouts
+- Web app manifest
+- Service worker and caching strategy
+- Browser camera, microphone, file-upload, and geolocation APIs
+- MapLibre GL or Mapbox
+- Recharts or Apache ECharts
+- IndexedDB, optional, for local drafts and temporary offline storage
+- Web Push, optional, for report-status notifications
+
+### Main Backend
+
+- ASP.NET Core Web API
+- Entity Framework Core
+- FluentValidation
+- SignalR
+- ASP.NET Identity or OAuth
+- MediatR, optional
+- Clean Architecture
+
+### AI Service
+
+- Python
+- FastAPI
+- PyTorch
+- Hugging Face Transformers
+- Sentence Transformers
+- PEFT and LoRA
+- scikit-learn
+- NumPy
+- pandas
+
+### Data Layer
+
+- PostgreSQL
+- PostGIS
+- pgvector
+- Redis
+- S3 or MinIO
+
+### Asynchronous Processing
+
+- RabbitMQ
+- Celery or custom Python consumers
+- .NET BackgroundService consumers
+- Dead-letter queues
+
+### Monitoring and Experiment Tracking
+
+- OpenTelemetry
+- Prometheus
+- Grafana
+- MLflow or Weights & Biases
+- Structured logging
+
+### DevOps
+
+- Docker
+- Docker Compose
+- GitHub Actions
+- AWS ECS, Azure Container Apps, or another container platform
+
+---
+
+## Repository Structure
+
+```text
+civic-signal-ai/
+├── frontend/
+│   ├── app/
+│   ├── components/
+│   ├── features/
+│   ├── services/
+│   ├── public/
+│   │   ├── manifest.webmanifest
+│   │   └── icons/
+│   └── pwa/
+│       ├── service-worker/
+│       └── offline-storage/
+│
+├── api/
+│   ├── CivicSignal.Api/
+│   ├── CivicSignal.Application/
+│   ├── CivicSignal.Domain/
+│   ├── CivicSignal.Infrastructure/
+│   └── CivicSignal.Tests/
+│
+├── ai-service/
+│   ├── app/
+│   │   ├── api/
+│   │   ├── models/
+│   │   ├── pipelines/
+│   │   ├── schemas/
+│   │   └── services/
+│   ├── tests/
+│   └── requirements.txt
+│
+├── workers/
+│   ├── audio-worker/
+│   ├── vision-worker/
+│   ├── triage-worker/
+│   └── forecasting-worker/
+│
+├── evaluation/
+│   ├── datasets/
+│   ├── notebooks/
+│   ├── metrics/
+│   └── reports/
+│
+├── infrastructure/
+│   ├── docker/
+│   ├── terraform/
+│   └── monitoring/
+│
+├── docs/
+│   ├── architecture/
+│   ├── api/
+│   └── decisions/
+│
+├── docker-compose.yml
+├── .env.example
+├── LICENSE
+└── README.md
+```
+
+---
+
+## Data Sources and APIs
+
+### NYC 311 Open Data
+
+Possible uses:
+
+- Historical complaint categories
+- Agencies
+- Geographic information
+- Created and resolved dates
+- Complaint status
+- Service request descriptions
+
+### National Weather Service API
+
+Possible weather features:
+
+- Rainfall
+- Flood alerts
+- Wind speed
+- Temperature
+- Severe weather
+- Recent observations
+
+Weather can help explain or forecast complaint spikes.
+
+### OpenStreetMap and Nominatim
+
+Possible uses:
+
+- Address search
+- Reverse geocoding
+- Intersection matching
+- Neighborhood names
+- Coordinate normalization
+
+### Optional Additional Sources
+
+- Local open-data portals
+- Census demographic data
+- Road-network data
+- Public transit alerts
+- City service policy documents
+
+---
+
+## Machine Learning Pipeline
+
+### 1. Text Preprocessing
+
+```text
+raw complaint
+→ normalization
+→ tokenization
+→ token IDs
+→ attention mask
+→ model input
+```
+
+### 2. Basic Classifier
+
+The first learning model can be built from scratch:
+
+```text
+tokens
+→ token IDs
+→ embedding layer
+→ pooled embedding
+→ linear layer
+→ logits
+→ softmax
+→ predicted category
+```
+
+This version reinforces:
+
+- Vocabulary
+- Embeddings
+- Forward pass
+- Backpropagation
+- Cross-entropy loss
+- Optimizers
+- Logits
+- Softmax
+
+### 3. Transformer Comparison
+
+Compare the simple model against:
+
+- TF-IDF plus logistic regression
+- LSTM
+- DistilBERT
+- DeBERTa
+- Zero-shot classification
+
+Suggested comparison table:
+
+| Model | Macro-F1 | Training Time | P95 Latency | Model Size |
+|---|---:|---:|---:|---:|
+| Embedding + Linear | TBD | TBD | TBD | TBD |
+| TF-IDF + Logistic Regression | TBD | TBD | TBD | TBD |
+| LSTM | TBD | TBD | TBD | TBD |
+| DistilBERT | TBD | TBD | TBD | TBD |
+| Zero-Shot Classifier | TBD | None | TBD | TBD |
+
+### 4. Duplicate Detection
+
+```text
+complaint text
+→ embedding model
+→ pgvector search
+→ nearby geographic filtering
+→ time filtering
+→ duplicate score
+```
+
+### 5. Multimodal Fusion
+
+Possible fusion strategy:
+
+```text
+text embedding
++ image embedding
++ audio transcript embedding
++ geographic features
++ time features
+→ fusion layer or scoring model
+→ final incident prediction
+```
+
+Start with a rule-based weighted score before training a learned fusion model.
+
+### 6. Generation
+
+Use a language model only after classification and retrieval are working reliably.
+
+Generation can be used for:
+
+- Incident summaries
+- Reviewer explanations
+- Daily operational reports
+- Draft work orders
+- Natural-language dashboard questions
+
+---
+
+## Agent Workflow
+
+The project can include a controlled triage agent.
+
+### Available Tools
+
+```text
+get_weather(location, date)
+search_nearby_cases(latitude, longitude, radius)
+retrieve_service_policy(category)
+predict_responsible_agency(complaint)
+calculate_sla_risk(case)
+create_draft_work_order(case)
+```
+
+### State Machine
+
+```mermaid
+flowchart TD
+    A[Understand Complaint] --> B[Collect Available Evidence]
+    B --> C[Search for Similar Cases]
+    C --> D[Retrieve Routing Policy]
+    D --> E[Generate Structured Recommendation]
+    E --> F{Confidence High Enough?}
+    F -- Yes --> G[Create Draft Work Order]
+    F -- No --> H[Send to Human Review]
+```
+
+The agent should return structured JSON and should not invent:
+
+- Agencies
+- Policies
+- Case IDs
+- Locations
+- Weather data
+- Historical records
+
+---
+
+## Human Review and Safety
+
+### Abstention
+
+When confidence is low:
+
+```json
+{
+  "status": "human_review_required",
+  "reason": "Image and text predictions disagree"
+}
+```
+
+### Review Triggers
+
+A report should require review when:
+
+- Model confidence is below a threshold
+- Image and text predictions disagree
+- Location cannot be verified
+- A likely duplicate has conflicting details
+- The model cannot identify a valid agency
+- A safety-sensitive category is detected
+- Required evidence is missing
+
+### Feedback Collection
+
+Reviewer corrections can later be used for:
+
+- Fine-tuning
+- Active learning
+- Threshold calibration
+- Error analysis
+- Model comparison
+
+---
+
+## Learning Goals
+
+This project is especially suitable for someone learning GPT and LLM concepts from scratch.
+
+### Phase 1: Core Neural Network Concepts
+
+Learn and implement:
+
+- Tokenization
+- Vocabulary creation
+- Token IDs
+- Embeddings
+- Linear layers
+- Logits
+- Softmax
+- Cross-entropy
+- Optimizers
+- Forward pass
+- Backpropagation
+
+### Phase 2: Transformer Concepts
+
+Study:
+
+- Positional embeddings
+- Self-attention
+- Causal masking
+- Multi-head attention
+- Feed-forward networks
+- Layer normalization
+- Transformer blocks
+- Hidden states
+
+### Phase 3: Applied LLM Engineering
+
+Use the project to learn:
+
+- Hugging Face pipelines
+- Fine-tuning
+- LoRA
+- Embeddings
+- Retrieval
+- Vector databases
+- Prompt versioning
+- Structured outputs
+- Evaluation
+- Model monitoring
+
+### Model Lab Page
+
+A dedicated educational page can show:
+
+- Tokens
+- Token IDs
+- Attention masks
+- Embeddings
+- Logits
+- Softmax probabilities
+- Similarity scores
+- Retrieved complaints
+- Model confidence
+- Final prediction
+
+This makes the portfolio stronger because it shows both engineering ability and understanding of model internals.
+
+---
+
+## Development Roadmap
+
+### Month 1: Data and Baseline Models
+
+- [ ] Create the repository structure
+- [ ] Set up Docker Compose
+- [ ] Create the PostgreSQL schema
+- [ ] Add PostGIS and pgvector
+- [ ] Build the NYC 311 ingestion pipeline
+- [ ] Create complaint search APIs
+- [ ] Build the mobile-first citizen report form
+- [ ] Configure the web app manifest and installable PWA shell
+- [ ] Build a desktop-oriented map dashboard
+- [ ] Train a basic text classifier
+- [ ] Add baseline evaluation
+- [ ] Document architecture decisions
+
+**Month 1 deliverable:**  
+Historical complaints appear on a map and can be automatically categorized.
+
+### Month 2: Multimodal Pipeline
+
+- [ ] Add camera capture and image upload
+- [ ] Add browser voice recording and audio upload
+- [ ] Add geolocation permission and manual location fallback
+- [ ] Add local draft recovery for interrupted submissions
+- [ ] Add Whisper transcription
+- [ ] Add image analysis
+- [ ] Add sentence embeddings
+- [ ] Add semantic search
+- [ ] Add duplicate detection
+- [ ] Add RabbitMQ
+- [ ] Add background workers
+- [ ] Add SignalR processing updates
+
+**Month 2 deliverable:**  
+A user can install the citizen PWA, submit text, audio, an image, and location from a phone, and receive a structured incident report.
+
+### Month 3: Production-Grade Features
+
+- [ ] Add controlled agent workflow
+- [ ] Add weather API integration
+- [ ] Add forecasting
+- [ ] Add human review
+- [ ] Add model version tracking
+- [ ] Add observability
+- [ ] Add rate limiting
+- [ ] Add load testing
+- [ ] Add cloud deployment
+- [ ] Record a demo video
+- [ ] Publish evaluation results
+
+**Month 3 deliverable:**  
+A deployed multimodal AI operations platform with measurable quality, latency, and reliability.
+
+---
+
+## Evaluation Metrics
+
+### Text Classification
+
+- Accuracy
+- Macro-F1
+- Per-category precision
+- Per-category recall
+- Confusion matrix
+
+### Duplicate Detection
+
+- Precision
+- Recall
+- F1
+- Recall@5
+- False-merge rate
+
+The false-merge rate is important because combining two unrelated incidents may be worse than missing a duplicate.
+
+### Audio
+
+- Word error rate
+- Transcription latency
+- Language-detection accuracy
+
+### Image Analysis
+
+- Precision
+- Recall
+- Human-agreement rate
+- Unsupported-detection rate
+
+### Forecasting
+
+- MAE
+- RMSE
+- MAPE, when appropriate
+- Performance compared with a moving-average baseline
+
+### Generated Reports
+
+- Required-field completion
+- Factual consistency
+- Unsupported-claim rate
+- Reviewer acceptance rate
+
+### System Performance
+
+- P50 latency
+- P95 latency
+- Requests per minute
+- Queue wait time
+- Failure rate
+- Cost per report
+- Cache-hit rate
+
+---
+
+## Getting Started
+
+> The commands below describe the planned local-development workflow for the citizen PWA, operations dashboard, ASP.NET Core API, and Python AI services. Update them as the repository is implemented.
+
+### Prerequisites
+
+- Docker
+- Docker Compose
+- .NET SDK
+- Python 3.11 or newer
+- Node.js 20 or newer
+- PostgreSQL client, optional
+- Git
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/your-username/civic-signal-ai.git
+cd civic-signal-ai
+```
+
+### Create Environment File
+
+```bash
+cp .env.example .env
+```
+
+### Start Infrastructure
+
+```bash
+docker compose up -d postgres redis rabbitmq minio
+```
+
+### Run the ASP.NET Core API
+
+```bash
+cd api/CivicSignal.Api
+dotnet restore
+dotnet ef database update
+dotnet run
+```
+
+### Run the AI Service
+
+```bash
+cd ai-service
+python -m venv .venv
+
+# macOS/Linux
+source .venv/bin/activate
+
+# Windows PowerShell
+# .venv\Scripts\Activate.ps1
+
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+### Run the Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Local URLs
+
+```text
+Frontend:        http://localhost:3000
+ASP.NET API:     http://localhost:5000
+AI Service:      http://localhost:8000
+RabbitMQ UI:     http://localhost:15672
+MinIO Console:   http://localhost:9001
+Grafana:         http://localhost:3001
+```
+
+---
+
+## Environment Variables
+
+Example `.env.example`:
+
+```env
+# Application
+APP_ENV=development
+FRONTEND_URL=http://localhost:3000
+
+# PostgreSQL
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=civic_signal
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# RabbitMQ
+RABBITMQ_HOST=localhost
+RABBITMQ_PORT=5672
+RABBITMQ_USER=guest
+RABBITMQ_PASSWORD=guest
+
+# Object Storage
+S3_ENDPOINT=http://localhost:9000
+S3_ACCESS_KEY=minioadmin
+S3_SECRET_KEY=minioadmin
+S3_BUCKET=civic-signal
+
+# AI
+HUGGINGFACE_TOKEN=
+TEXT_CLASSIFICATION_MODEL=
+EMBEDDING_MODEL=BAAI/bge-m3
+ASR_MODEL=openai/whisper-small
+VISION_MODEL=
+
+# External APIs
+NYC_311_API_URL=
+NWS_API_BASE_URL=
+NOMINATIM_BASE_URL=
+
+# Observability
+OTEL_EXPORTER_OTLP_ENDPOINT=
+```
+
+Never commit real secrets to Git.
+
+---
+
+## API Design
+
+### Create an Incident
+
+```http
+POST /api/incidents
+Content-Type: multipart/form-data
+```
+
+Possible fields:
+
+```text
+description
+latitude
+longitude
+audio
+image
+document
+```
+
+### Get an Incident
+
+```http
+GET /api/incidents/{incidentId}
+```
+
+### Search Incidents
+
+```http
+GET /api/incidents?category=pothole&status=open
+```
+
+### Find Similar Incidents
+
+```http
+GET /api/incidents/{incidentId}/similar
+```
+
+### Review an Incident
+
+```http
+POST /api/incidents/{incidentId}/review
+```
+
+Example request:
+
+```json
+{
+  "approved": true,
+  "correctedCategory": "Street Condition",
+  "correctedAgency": "Department of Transportation",
+  "duplicateOfIncidentId": null,
+  "reviewerNotes": "Prediction verified."
+}
+```
+
+### Get Processing Status
+
+```http
+GET /api/incidents/{incidentId}/status
+```
+
+Example response:
+
+```json
+{
+  "status": "processing",
+  "steps": [
+    {
+      "name": "audio_transcription",
+      "status": "completed"
+    },
+    {
+      "name": "image_analysis",
+      "status": "completed"
+    },
+    {
+      "name": "duplicate_search",
+      "status": "running"
+    }
+  ]
+}
+```
+
+---
+
+## Testing
+
+### Backend Tests
+
+- Unit tests for domain logic
+- Integration tests for database queries
+- API contract tests
+- Authentication and authorization tests
+- Geospatial query tests
+- Background-worker retry tests
+
+### AI Tests
+
+- Model-loading tests
+- Schema validation
+- Deterministic fixture tests
+- Confidence-threshold tests
+- Regression evaluation
+- Hallucination and unsupported-claim tests
+
+### Frontend Tests
+
+- Component tests
+- Form validation tests
+- Upload tests
+- Map interaction tests
+- Human-review workflow tests
+
+### Load Tests
+
+Test:
+
+- Concurrent uploads
+- Large image files
+- Long audio files
+- Queue backlog
+- Slow model responses
+- Database vector search
+- Worker failures
+
+Possible tools:
+
+- k6
+- Locust
+- NBomber
+
+---
+
+## Deployment
+
+### Suggested Cloud Architecture
+
+```text
+Next.js PWA and operations dashboard
+→ HTTPS-enabled CDN or managed web hosting
+→ ASP.NET Core container
+→ Python AI container
+→ managed PostgreSQL
+→ Redis
+→ message queue
+→ object storage
+→ model endpoint or GPU container
+```
+
+### CI/CD Pipeline
+
+A GitHub Actions workflow can:
+
+1. Run frontend tests.
+2. Run .NET tests.
+3. Run Python tests.
+4. Build Docker images.
+5. Run security scanning.
+6. Push images to a registry.
+7. Deploy to staging.
+8. Run smoke tests.
+9. Promote to production after approval.
+
+---
+
+## Resume Value
+
+This project can demonstrate:
+
+- Full-stack development
+- ASP.NET Core backend engineering
+- Python AI services
+- Multimodal AI
+- Hugging Face Transformers
+- Embeddings and vector retrieval
+- Geospatial data processing
+- Agent tool orchestration
+- Distributed background jobs
+- Human-in-the-loop workflows
+- Model evaluation
+- Observability
+- Cloud deployment
+- Responsible AI design
+
+### Resume Project Title
+
+**CivicSignal AI — Multimodal City Incident Intelligence Platform**
+
+### Resume Bullet Templates
+
+Replace placeholders only after measuring real results.
+
+- Developed a mobile-first Next.js Progressive Web App and desktop operations dashboard using ASP.NET Core, FastAPI, PostgreSQL/PostGIS, pgvector, RabbitMQ, and Hugging Face models to process text, image, audio, and location-based service requests.
+- Built an asynchronous AI pipeline integrating speech recognition, image analysis, text classification, vector similarity, geographic filtering, and evidence-backed report generation.
+- Processed **[number]** public service records and achieved **[macro-F1]** complaint-routing performance across **[number]** categories.
+- Implemented semantic and geospatial duplicate detection with **[precision]** precision and **[recall]** recall.
+- Designed confidence thresholds, human review, model versioning, and replayable evaluation to reduce unsupported automated decisions.
+- Deployed containerized services with CI/CD, monitoring, caching, and P95 inference latency of **[time]**.
+
+Do not add invented performance numbers. Measure every value before adding it to a resume.
+
+---
+
+## Future Improvements
+
+- Native mobile application using Flutter or React Native
+- Background upload synchronization
+- Push notifications for report-status changes
+- Expanded offline-first incident capture
+- Multilingual complaint submission
+- Nepali-language support
+- Active learning from reviewer corrections
+- Fine-tuned multimodal model
+- Graph-based relationship analysis
+- Agency workload optimization
+- Route planning for field teams
+- Privacy-preserving image redaction
+- Automatic license-plate and face blurring
+- Model drift detection
+- Fairness analysis across neighborhoods
+- Real municipal-system integration
+- Emergency-report detection and redirection
+- Digital twin visualization
+- Public transparency dashboard
+
+---
+
+## Project Status
+
+This repository is currently intended as a project blueprint and implementation roadmap.
+
+Suggested status labels:
+
+```text
+Planning
+Data Pipeline
+Baseline Model
+Multimodal Pipeline
+Human Review
+Evaluation
+Deployment
+```
+
+---
+
+## Contributing
+
+This project is suitable for a solo developer or a small team.
+
+Possible team roles:
+
+- Backend engineer
+- Frontend engineer
+- Machine learning engineer
+- Data engineer
+- UX designer
+
+Before contributing:
+
+1. Create an issue.
+2. Describe the proposed change.
+3. Add tests.
+4. Update documentation.
+5. Submit a pull request.
+
+---
+
+## License
+
+Choose a license before publishing the repository.
+
+Common options:
+
+- MIT License
+- Apache License 2.0
+
+Also review the license of every dataset and model used by the project.
+
+---
+
+## Author
+
+**Krit Shrestha**
+
+Software engineer learning LLM and GPT systems from first principles while building production-style AI applications.
+
+---
+
+## Acknowledgments
+
+Built with technologies from:
+
+- Hugging Face
+- PyTorch
+- ASP.NET Core
+- FastAPI
+- PostgreSQL
+- PostGIS
+- pgvector
+- OpenStreetMap
+- Public city open-data platforms
+
+---
+
+> CivicSignal AI is designed to demonstrate the difference between an AI demo and an AI engineering system: measurable quality, clear evidence, scalable architecture, human oversight, and reliable failure handling.

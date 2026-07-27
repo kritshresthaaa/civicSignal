@@ -1,0 +1,252 @@
+[
+  {
+    "id": "dup-road-001",
+    "text": "Large pothole in the right lane near Pine Street and 3rd Avenue.",
+    "latitude": 40.7128,
+    "longitude": -74.006,
+    "createdAt": "2026-07-20T10:00:00Z",
+    "imageLabels": ["RoadDamage"],
+    "candidates": [
+      {
+        "id": "road-a",
+        "text": "Big pothole on Pine Street by 3rd Avenue forcing cars to swerve.",
+        "latitude": 40.71286,
+        "longitude": -74.00608,
+        "createdAt": "2026-07-20T09:38:00Z",
+        "imageLabels": ["RoadDamage"],
+        "duplicate": true
+      },
+      {
+        "id": "road-b",
+        "text": "Small road crack near Pine Street five blocks away.",
+        "latitude": 40.716,
+        "longitude": -74.009,
+        "createdAt": "2026-07-20T09:50:00Z",
+        "imageLabels": ["RoadDamage"],
+        "duplicate": false
+      },
+      {
+        "id": "light-a",
+        "text": "Streetlight out near Pine Street and 3rd Avenue.",
+        "latitude": 40.71282,
+        "longitude": -74.00602,
+        "createdAt": "2026-07-20T09:55:00Z",
+        "imageLabels": ["Streetlight"],
+        "duplicate": false
+      },
+      {
+        "id": "road-c",
+        "text": "Pothole reported on Pine Street last month.",
+        "latitude": 40.71283,
+        "longitude": -74.00606,
+        "createdAt": "2026-06-10T09:00:00Z",
+        "imageLabels": ["RoadDamage"],
+        "duplicate": false
+      }
+    ]
+  },
+  {
+    "id": "dup-flood-001",
+    "text": "Blocked storm drain causing standing water at the corner of Market and 8th.",
+    "latitude": 40.719,
+    "longitude": -74.0021,
+    "createdAt": "2026-07-20T11:00:00Z",
+    "imageLabels": ["Flooding"],
+    "candidates": [
+      {
+        "id": "flood-a",
+        "text": "Standing water from clogged drain at Market Street and 8th Avenue.",
+        "latitude": 40.71905,
+        "longitude": -74.00205,
+        "createdAt": "2026-07-20T10:45:00Z",
+        "imageLabels": ["Flooding"],
+        "duplicate": true
+      },
+      {
+        "id": "flood-b",
+        "text": "Water leak near Market and 12th Avenue.",
+        "latitude": 40.724,
+        "longitude": -74.005,
+        "createdAt": "2026-07-20T10:30:00Z",
+        "imageLabels": ["Flooding"],
+        "duplicate": false
+      },
+      {
+        "id": "trash-a",
+        "text": "Trash bags blocking a storm drain outside a deli.",
+        "latitude": 40.71908,
+        "longitude": -74.00206,
+        "createdAt": "2026-07-20T10:50:00Z",
+        "imageLabels": ["Sanitation"],
+        "duplicate": false
+      }
+    ]
+  },
+  {
+    "id": "dup-light-001",
+    "text": "Streetlight out by the school crosswalk on Cedar Road.",
+    "latitude": 40.7015,
+    "longitude": -74.0112,
+    "createdAt": "2026-07-21T20:30:00Z",
+    "imageLabels": ["Streetlight"],
+    "candidates": [
+      {
+        "id": "light-b",
+        "text": "Lamp is not working at the Cedar Road school crosswalk.",
+        "latitude": 40.70148,
+        "longitude": -74.01125,
+        "createdAt": "2026-07-21T20:12:00Z",
+        "imageLabels": ["Streetlight"],
+        "duplicate": true
+      },
+      {
+        "id": "light-c",
+        "text": "Traffic light blinking red on Cedar Road downtown.",
+        "latitude": 40.7059,
+        "longitude": -74.014,
+        "createdAt": "2026-07-21T20:00:00Z",
+        "imageLabels": ["Streetlight"],
+        "duplicate": false
+      },
+      {
+        "id": "tree-a",
+        "text": "Tree branch hanging near the school crosswalk.",
+        "latitude": 40.7015,
+        "longitude": -74.0112,
+        "createdAt": "2026-07-21T20:10:00Z",
+        "imageLabels": ["TreeHazard"],
+        "duplicate": false
+      }
+    ]
+  },
+  {
+    "id": "dup-sanitation-001",
+    "text": "Illegal dumping of furniture and trash bags behind the grocery store.",
+    "latitude": 40.7331,
+    "longitude": -74.0018,
+    "createdAt": "2026-07-22T07:20:00Z",
+    "imageLabels": ["Sanitation"],
+    "candidates": [
+      {
+        "id": "trash-b",
+        "text": "Furniture dumped behind the grocery store with several garbage bags.",
+        "latitude": 40.73314,
+        "longitude": -74.00178,
+        "createdAt": "2026-07-22T07:05:00Z",
+        "imageLabels": ["Sanitation"],
+        "duplicate": true
+      },
+      {
+        "id": "trash-c",
+        "text": "Overflowing trash can at the grocery store entrance.",
+        "latitude": 40.7333,
+        "longitude": -74.00195,
+        "createdAt": "2026-07-22T07:10:00Z",
+        "imageLabels": ["Sanitation"],
+        "duplicate": false
+      },
+      {
+        "id": "graffiti-a",
+        "text": "Graffiti on the wall behind the grocery store.",
+        "latitude": 40.7331,
+        "longitude": -74.0018,
+        "createdAt": "2026-07-22T07:08:00Z",
+        "imageLabels": ["Graffiti"],
+        "duplicate": false
+      }
+    ]
+  },
+  {
+    "id": "dup-graffiti-001",
+    "text": "Graffiti tags on the south wall of the library.",
+    "latitude": 40.7412,
+    "longitude": -73.99,
+    "createdAt": "2026-07-22T14:00:00Z",
+    "imageLabels": ["Graffiti"],
+    "candidates": [
+      {
+        "id": "graffiti-b",
+        "text": "Spray paint tags were added to the south library wall.",
+        "latitude": 40.74123,
+        "longitude": -73.99004,
+        "createdAt": "2026-07-22T13:50:00Z",
+        "imageLabels": ["Graffiti"],
+        "duplicate": true
+      },
+      {
+        "id": "graffiti-c",
+        "text": "Graffiti on a bridge column near the library district.",
+        "latitude": 40.744,
+        "longitude": -73.994,
+        "createdAt": "2026-07-22T13:45:00Z",
+        "imageLabels": ["Graffiti"],
+        "duplicate": false
+      }
+    ]
+  },
+  {
+    "id": "dup-tree-001",
+    "text": "Fallen tree branch blocking the walking path in Riverside Park.",
+    "latitude": 40.752,
+    "longitude": -73.981,
+    "createdAt": "2026-07-23T08:10:00Z",
+    "imageLabels": ["TreeHazard"],
+    "candidates": [
+      {
+        "id": "tree-b",
+        "text": "Tree limb down across the Riverside Park walking path.",
+        "latitude": 40.75204,
+        "longitude": -73.98102,
+        "createdAt": "2026-07-23T08:02:00Z",
+        "imageLabels": ["TreeHazard"],
+        "duplicate": true
+      },
+      {
+        "id": "tree-c",
+        "text": "Broken branch hanging above a playground.",
+        "latitude": 40.756,
+        "longitude": -73.985,
+        "createdAt": "2026-07-23T08:00:00Z",
+        "imageLabels": ["TreeHazard"],
+        "duplicate": false
+      },
+      {
+        "id": "road-d",
+        "text": "Sidewalk crack on Riverside Park path.",
+        "latitude": 40.75203,
+        "longitude": -73.98103,
+        "createdAt": "2026-07-23T08:03:00Z",
+        "imageLabels": ["RoadDamage"],
+        "duplicate": false
+      }
+    ]
+  },
+  {
+    "id": "dup-none-001",
+    "text": "Noise complaint about loud music from a storefront after midnight.",
+    "latitude": 40.763,
+    "longitude": -73.972,
+    "createdAt": "2026-07-23T01:00:00Z",
+    "imageLabels": [],
+    "candidates": [
+      {
+        "id": "noise-a",
+        "text": "Loud music coming from an apartment several blocks away.",
+        "latitude": 40.768,
+        "longitude": -73.976,
+        "createdAt": "2026-07-23T01:05:00Z",
+        "imageLabels": [],
+        "duplicate": false
+      },
+      {
+        "id": "general-a",
+        "text": "Question about storefront permit hours.",
+        "latitude": 40.763,
+        "longitude": -73.972,
+        "createdAt": "2026-07-23T01:10:00Z",
+        "imageLabels": [],
+        "duplicate": false
+      }
+    ]
+  }
+]

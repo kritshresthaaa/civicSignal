@@ -1,0 +1,28 @@
+bin/
+obj/
+TestResults/
+.vs/
+.vscode/
+.idea/
+
+*.user
+*.suo
+*.log
+
+.env
+.env.*
+!.env.example
+!.env.huggingface.example
+
+artifacts/
+coverage/
+var/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# OS/editor noise
+.DS_Store

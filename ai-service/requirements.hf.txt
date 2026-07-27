@@ -1,0 +1,8 @@
+numpy
+scikit-learn
+torch
+transformers
+sentence-transformers
+pillow
+sentencepiece
+protobuf
