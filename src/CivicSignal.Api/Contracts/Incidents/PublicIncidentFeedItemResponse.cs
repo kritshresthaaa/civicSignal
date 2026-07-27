@@ -14,5 +14,7 @@ public sealed record PublicIncidentFeedItemResponse(
     bool IsDuplicate,
     string AreaLabel,
     int MediaCount,
+    int SupportCount,
+    int CommentCount,
     string? LatestImageUrl,
     string? LatestMediaSummary);

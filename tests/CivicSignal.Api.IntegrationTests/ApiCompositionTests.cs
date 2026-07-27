@@ -260,6 +260,8 @@ public sealed class ApiCompositionTests(WebApplicationFactory<Program> factory)
         Assert.Contains("\"approximateLongitude\":-74.006", json, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("\"category\":\"RoadDamage\"", json, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("\"agencyCode\":\"DOT\"", json, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("\"supportCount\":1", json, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("\"commentCount\":2", json, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("reviewNote", json, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("reviewedByUserId", json, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("assignedByUserId", json, StringComparison.OrdinalIgnoreCase);
@@ -544,7 +546,29 @@ public sealed class ApiCompositionTests(WebApplicationFactory<Program> factory)
             Guid incidentId,
             CancellationToken cancellationToken = default)
         {
-            throw new NotSupportedException();
+            IReadOnlyCollection<IncidentFeedbackDto> feedback =
+            [
+                new IncidentFeedbackDto(
+                    Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
+                    incidentId,
+                    5,
+                    null,
+                    DateTimeOffset.Parse("2026-07-23T12:02:00Z")),
+                new IncidentFeedbackDto(
+                    Guid.Parse("ffffffff-ffff-ffff-ffff-ffffffffffff"),
+                    incidentId,
+                    4,
+                    "Standing water is spreading toward the crosswalk.",
+                    DateTimeOffset.Parse("2026-07-23T12:03:00Z")),
+                new IncidentFeedbackDto(
+                    Guid.Parse("99999999-9999-9999-9999-999999999999"),
+                    incidentId,
+                    3,
+                    "Please add cones before rush hour.",
+                    DateTimeOffset.Parse("2026-07-23T12:04:00Z"))
+            ];
+
+            return Task.FromResult<IReadOnlyCollection<IncidentFeedbackDto>?>(feedback);
         }
 
         public Task<IncidentFeedbackDto> AddFeedbackAsync(

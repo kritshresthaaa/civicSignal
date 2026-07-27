@@ -22,6 +22,7 @@ import {
   CivicApiError,
   getOptional,
   getPublicDuplicateCandidates,
+  getPublicIncidentFeedback,
   getPublicIncident,
   getPublicIncidentMedia,
   getPublicIncidentStatus,
@@ -69,12 +70,14 @@ export function PublicIncidentDetail({ trackingCode }: { trackingCode: string })
         loadedPrediction,
         loadedMedia,
         loadedDuplicates,
+        loadedFeedback,
       ] = await Promise.all([
         getPublicIncidentWithFeedFallback(trackingCode),
         getPublicDetailOptional(() => getPublicIncidentStatus(trackingCode)),
         getPublicDetailOptional(() => getPublicLatestPrediction(trackingCode)),
         getPublicDetailOptional(() => getPublicIncidentMedia(trackingCode)),
         getPublicDetailOptional(() => getPublicDuplicateCandidates(trackingCode)),
+        getPublicDetailOptional(() => getPublicIncidentFeedback(trackingCode)),
       ]);
 
       setIncident(loadedIncident);
@@ -82,6 +85,7 @@ export function PublicIncidentDetail({ trackingCode }: { trackingCode: string })
       setPrediction(loadedPrediction);
       setMedia(loadedMedia ?? []);
       setDuplicates(loadedDuplicates ?? []);
+      setFeedback(loadedFeedback ?? []);
       setError(null);
     } catch (loadError) {
       setError(loadError instanceof CivicApiError ? loadError.message : "Could not load this public report.");

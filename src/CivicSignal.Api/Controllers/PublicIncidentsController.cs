@@ -34,7 +34,8 @@ public sealed class PublicIncidentsController(
         {
             var prediction = await intelligence.GetLatestPredictionAsync(incident.Id, cancellationToken);
             var media = await intelligence.GetMediaAsync(incident.Id, cancellationToken);
-            response.Add(ToPublicFeedItem(incident, prediction, media ?? []));
+            var feedback = await incidents.GetFeedbackAsync(incident.Id, cancellationToken);
+            response.Add(ToPublicFeedItem(incident, prediction, media ?? [], feedback ?? []));
         }
 
         return Ok(response);
@@ -278,7 +279,8 @@ public sealed class PublicIncidentsController(
     private static PublicIncidentFeedItemResponse ToPublicFeedItem(
         IncidentDto incident,
         TriagePredictionDto? prediction,
-        IReadOnlyCollection<IncidentMediaDto> media)
+        IReadOnlyCollection<IncidentMediaDto> media,
+        IReadOnlyCollection<IncidentFeedbackDto> feedback)
     {
         var latitude = RoundPublicCoordinate(incident.Latitude);
         var longitude = RoundPublicCoordinate(incident.Longitude);
@@ -305,6 +307,8 @@ public sealed class PublicIncidentsController(
             incident.DuplicateOfIncidentId is not null,
             $"Near {latitude:0.000}, {longitude:0.000}",
             media.Count,
+            feedback.Count(item => item.Rating >= 5),
+            feedback.Count(item => !string.IsNullOrWhiteSpace(item.Comment)),
             latestImage?.StorageUri,
             latestMediaSummary);
     }

@@ -52,6 +52,7 @@ import { statusLabel } from "@/lib/civic-analysis";
 import {
   CivicApiError,
   searchPublicIncidents,
+  submitPublicIncidentFeedback,
   type PublicIncidentFeedItemDto,
 } from "@/lib/civic-api";
 import type { IncidentStatus, Severity } from "@/lib/civic-types";
@@ -695,6 +696,9 @@ function FeedItem({
   selected: boolean;
 }) {
   const [helpful, setHelpful] = useState(false);
+  const [helpfulPending, setHelpfulPending] = useState(false);
+  const [helpfulError, setHelpfulError] = useState<string | null>(null);
+  const [supportBaseAtVote, setSupportBaseAtVote] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const status = normalizeStatus(item.status);
@@ -702,6 +706,31 @@ function FeedItem({
   const nextStep = nextPublicStep(item);
   const imageUrl = imageFailed ? null : resolvePublicMediaUrl(item.latestImageUrl);
   const mediaCount = item.mediaCount ?? 0;
+  const backendSupportCount = item.supportCount ?? 0;
+  const supportCount = backendSupportCount + (helpful && supportBaseAtVote !== null && backendSupportCount <= supportBaseAtVote ? 1 : 0);
+  const commentCount = item.commentCount ?? 0;
+
+  async function markHelpful() {
+    if (helpful || helpfulPending) {
+      return;
+    }
+
+    setHelpfulPending(true);
+    setHelpfulError(null);
+
+    try {
+      await submitPublicIncidentFeedback(item.trackingCode, {
+        comment: null,
+        rating: 5,
+      });
+      setHelpful(true);
+      setSupportBaseAtVote(backendSupportCount);
+    } catch (error) {
+      setHelpfulError(error instanceof CivicApiError ? error.message : "Could not record helpful feedback.");
+    } finally {
+      setHelpfulPending(false);
+    }
+  }
 
   async function copyReportLink() {
     const url = `${window.location.origin}/public/incidents/${encodeURIComponent(item.trackingCode)}`;
@@ -792,13 +821,19 @@ function FeedItem({
         <div className="mt-3 flex items-center justify-between border-y border-civic-border py-2 text-xs font-semibold text-civic-muted">
           <span className="inline-flex items-center gap-2">
             <ThumbsUp className={`h-4 w-4 ${helpful ? "text-civic-primary" : ""}`} aria-hidden="true" />
-            {helpful ? "Marked helpful" : "Community visibility"}
+            {supportCount} resident confirmation{supportCount === 1 ? "" : "s"}
           </span>
-          <span>{mediaCount} media · {item.hasReview ? "reviewed" : "awaiting review"}</span>
+          <span>{commentCount} notes · {mediaCount} media</span>
         </div>
+        {helpfulError ? <p className="mt-2 text-xs font-semibold text-status-critical-text">{helpfulError}</p> : null}
 
         <footer className="grid grid-cols-2 gap-2 pt-3 sm:grid-cols-4">
-          <PostAction active={helpful} icon={<Heart className="h-4 w-4" aria-hidden="true" />} label="Helpful" onClick={() => setHelpful((current) => !current)} />
+          <PostAction
+            active={helpful || helpfulPending}
+            icon={helpfulPending ? <RefreshCw className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Heart className="h-4 w-4" aria-hidden="true" />}
+            label={helpful ? "Supported" : helpfulPending ? "Saving" : "Helpful"}
+            onClick={() => void markHelpful()}
+          />
           <Link
             className="inline-flex h-10 items-center justify-center gap-2 rounded-md text-sm font-semibold text-civic-muted transition hover:bg-civic-soft hover:text-civic-primary"
             href={`/public/incidents/${encodeURIComponent(item.trackingCode)}#comments`}

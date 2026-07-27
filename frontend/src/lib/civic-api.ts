@@ -47,6 +47,8 @@ export type PublicIncidentFeedItemDto = {
   latestImageUrl?: string | null;
   latestMediaSummary?: string | null;
   mediaCount: number;
+  supportCount: number;
+  commentCount: number;
   severity: string;
   status: string;
   trackingCode: string;
