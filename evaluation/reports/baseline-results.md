@@ -1,6 +1,6 @@
 # CivicSignal AI Baseline Evaluation
 
-Generated: `2026-07-25T02:58:18+00:00`
+Generated: `2026-07-27T03:21:49+00:00`
 
 This report evaluates deterministic local baselines against fixed fixtures. It is the repeatable benchmark for future Hugging Face, pgvector, and forecasting model changes.
 

@@ -55,6 +55,15 @@ python3 -m unittest discover -s evaluation/tests
 
 The generated report is written to `evaluation/reports/baseline-results.md`.
 
+## Portfolio Report
+
+The portfolio-ready synthesis lives at [`docs/quality/portfolio-evaluation-report.md`](../docs/quality/portfolio-evaluation-report.md). It explains which metrics are safe to cite, which results are only fixture-level baselines, and what still needs stronger evidence before making production-grade claims.
+
+Use the report together with:
+
+- [`evaluation/reports/baseline-results.md`](reports/baseline-results.md) for repeatable deterministic fixture metrics.
+- [`evaluation/reports/ai-service-results.md`](reports/ai-service-results.md) for the last captured FastAPI/Hugging Face-ready model-service run.
+
 ## Dataset Layout
 
 - `datasets/classification_cases.jsonl`: labeled incident text, category, severity, and agency routing fixtures.

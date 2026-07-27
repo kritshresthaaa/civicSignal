@@ -55,6 +55,8 @@ The controlled agent workflow runs a fixed tool sequence over stored backend dat
 
 AI evaluation baselines are exposed to staff clients at `GET /api/ai-evaluations/baselines`. The response mirrors the repeatable reports in `evaluation/` with fixture counts, metric groups, pass/fail gates, model-run readiness, and promotion rules for future Hugging Face/OpenAI model comparisons.
 
+Portfolio evaluation evidence is summarized in `docs/quality/portfolio-evaluation-report.md`. It links the deterministic baseline report, the last captured AI-service model run, safe LinkedIn/GitHub claims, and the remaining proof needed before making production-grade AI claims.
+
 Model Lab is exposed at `POST /api/model-lab/analyze` and in the frontend at `/public/model-lab` and `/admin/model-lab`. It shows a transparent baseline text classifier with tokenization, stable token IDs, hashing-trick embedding features, logits, softmax probabilities, evidence terms, category prediction, agency routing, severity, and confidence.
 
 Human review stores both the latest correction summary and an audit history. Reviewers can accept or reject the AI prediction, correct category, agency, and severity, mark a duplicate incident, and record notes for model feedback.

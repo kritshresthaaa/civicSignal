@@ -1,6 +1,6 @@
 # Requirements Implementation Audit
 
-Last reviewed: 2026-07-25
+Last reviewed: 2026-07-27
 
 ## Implemented or Mostly Implemented
 
@@ -15,6 +15,7 @@ Last reviewed: 2026-07-25
 - Citizen PWA shell, report form, geolocation/manual fallback, camera/file/audio capture, local draft recovery, public status page, and admin dashboards.
 - SignalR status updates, RabbitMQ queues/retries/dead-letter queues, Redis cache abstraction, S3-compatible object storage, weather integration, forecasting baseline, Model Lab, and AI evaluation pages.
 - Repeatable AI service evaluation runner for the live FastAPI inference boundary, including Hugging Face-backed text triage, semantic embedding duplicate metrics, forecasting metrics, runtime mode, model names, model versions, dependency readiness, and optional media endpoint coverage.
+- Portfolio evaluation synthesis in `docs/quality/portfolio-evaluation-report.md`, including safe showcase claims, current metric snapshot, and remaining proof needed before production-grade AI claims.
 - Browser notification delivery for citizen status alerts, including permission handling and notification click-through to the public tracking page.
 - Offline queued citizen report submissions using IndexedDB, including queued media files and automatic sync when the browser comes back online.
 
@@ -35,4 +36,4 @@ Last reviewed: 2026-07-25
 - Notifications: browser notifications are implemented, but external SMS/email providers and true server-side Web Push subscriptions are not wired.
 - Offline PWA depth: draft recovery and in-app queued submission sync exist, but service-worker background sync is still a future hardening step.
 - Weather is implemented behind configuration, but it is disabled by default and needs live API validation in the full stack.
-- Demo deliverables: production demo video and final evaluation report are still pending.
+- Demo deliverables: production demo video is still pending.
