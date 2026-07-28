@@ -79,6 +79,7 @@ public sealed class ApiCompositionTests(WebApplicationFactory<Program> factory)
         Assert.Contains("/api/system/capabilities", json, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("/api/system/integrations", json, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("/api/system/runtime-policy", json, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("/api/system/health", json, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("/health", json, StringComparison.OrdinalIgnoreCase);
     }
 
@@ -102,6 +103,7 @@ public sealed class ApiCompositionTests(WebApplicationFactory<Program> factory)
         Assert.Contains("model-lab-classifier", capabilities.Features);
         Assert.Contains("ai-evaluation-baselines", capabilities.Features);
         Assert.Contains("ai-evaluation-quality-gates", capabilities.Features);
+        Assert.Contains("operational-health-checks", capabilities.Features);
         Assert.Contains("api/historical-complaints/summary", capabilities.Routes);
         Assert.Contains("api/data-import-jobs", capabilities.Routes);
         Assert.Contains("api/data-import-jobs/nyc311", capabilities.Routes);
@@ -112,6 +114,7 @@ public sealed class ApiCompositionTests(WebApplicationFactory<Program> factory)
         Assert.Contains("api/ai-evaluations/baselines", capabilities.Routes);
         Assert.Contains("api/system/integrations", capabilities.Routes);
         Assert.Contains("api/system/runtime-policy", capabilities.Routes);
+        Assert.Contains("api/system/health", capabilities.Routes);
     }
 
     [Fact]
@@ -121,16 +124,22 @@ public sealed class ApiCompositionTests(WebApplicationFactory<Program> factory)
 
         var integrationsResponse = await client.GetAsync("/api/system/integrations");
         var policyResponse = await client.GetAsync("/api/system/runtime-policy");
+        var healthResponse = await client.GetAsync("/api/system/health");
 
         integrationsResponse.EnsureSuccessStatusCode();
         policyResponse.EnsureSuccessStatusCode();
+        healthResponse.EnsureSuccessStatusCode();
         var integrationsJson = await integrationsResponse.Content.ReadAsStringAsync();
         var policyJson = await policyResponse.Content.ReadAsStringAsync();
+        var health = await healthResponse.Content.ReadFromJsonAsync<SystemHealthResponse>();
 
         Assert.Contains("PostgreSQL/PostGIS", integrationsJson, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Python AI service", integrationsJson, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("duplicateMinimumScore", policyJson, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("textEmbeddingDimensions", policyJson, StringComparison.OrdinalIgnoreCase);
+        Assert.NotNull(health);
+        Assert.NotEmpty(health.Checks);
+        Assert.Contains(health.Checks, check => check.Name == "Request correlation");
     }
 
     [Fact]
@@ -144,6 +153,7 @@ public sealed class ApiCompositionTests(WebApplicationFactory<Program> factory)
         Assert.Equal("nosniff", response.Headers.GetValues("X-Content-Type-Options").Single());
         Assert.Equal("DENY", response.Headers.GetValues("X-Frame-Options").Single());
         Assert.Equal("strict-origin-when-cross-origin", response.Headers.GetValues("Referrer-Policy").Single());
+        Assert.True(response.Headers.Contains("X-Correlation-ID"));
     }
 
     [Fact]

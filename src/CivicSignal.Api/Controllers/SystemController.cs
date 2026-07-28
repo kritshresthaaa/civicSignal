@@ -1,7 +1,10 @@
 using CivicSignal.Api.Contracts.System;
+using CivicSignal.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace CivicSignal.Api.Controllers;
 
@@ -11,7 +14,8 @@ namespace CivicSignal.Api.Controllers;
 public sealed class SystemController(
     EndpointDataSource endpoints,
     IWebHostEnvironment environment,
-    IConfiguration configuration) : ControllerBase
+    IConfiguration configuration,
+    CivicSignalDbContext dbContext) : ControllerBase
 {
     [HttpGet("capabilities")]
     [ProducesResponseType<SystemCapabilitiesResponse>(StatusCodes.Status200OK)]
@@ -46,7 +50,8 @@ public sealed class SystemController(
                 "controlled-agent-workflow",
                 "model-lab-classifier",
                 "ai-evaluation-baselines",
-                "ai-evaluation-quality-gates"
+                "ai-evaluation-quality-gates",
+                "operational-health-checks"
             ],
             Routes: routes));
     }
@@ -152,5 +157,264 @@ public sealed class SystemController(
             RabbitMqEnabled: configuration.GetValue<bool>("RabbitMq:Enabled"),
             WeatherEnabled: configuration.GetValue<bool>("Weather:Enabled"),
             GeocodingEnabled: configuration.GetValue<bool>("Nominatim:Enabled")));
+    }
+
+    [HttpGet("health")]
+    [ProducesResponseType<SystemHealthResponse>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<SystemHealthResponse>> GetHealth(CancellationToken cancellationToken)
+    {
+        List<SystemHealthCheckDto> checks =
+        [
+            new(
+                Name: "API process",
+                Category: "Runtime",
+                Status: "Healthy",
+                Critical: true,
+                Detail: "ASP.NET Core request pipeline is responding."),
+            new(
+                Name: "Request correlation",
+                Category: "Observability",
+                Status: "Configured",
+                Critical: false,
+                Detail: "Responses include X-Correlation-ID for log and request tracing.")
+        ];
+
+        await AddDatabaseChecksAsync(checks, cancellationToken);
+        AddStorageCheck(checks);
+        AddConfiguredIntegrationChecks(checks);
+
+        var status = ResolveOverallStatus(checks);
+
+        return Ok(new SystemHealthResponse(
+            Service: "CivicSignal.Api",
+            Environment: environment.EnvironmentName,
+            Status: status,
+            GeneratedAt: DateTimeOffset.UtcNow,
+            Checks: checks));
+    }
+
+    private async Task<bool> AddDatabaseChecksAsync(
+        List<SystemHealthCheckDto> checks,
+        CancellationToken cancellationToken)
+    {
+        var stopwatch = Stopwatch.StartNew();
+
+        try
+        {
+            var canConnect = await dbContext.Database.CanConnectAsync(cancellationToken);
+            stopwatch.Stop();
+
+            checks.Add(new SystemHealthCheckDto(
+                Name: "PostgreSQL connection",
+                Category: "Persistence",
+                Status: canConnect ? "Healthy" : "Unavailable",
+                Critical: true,
+                Detail: canConnect
+                    ? "EF Core can connect to the CivicSignal database."
+                    : "The API cannot connect to PostgreSQL.",
+                LatencyMilliseconds: stopwatch.ElapsedMilliseconds));
+
+            if (!canConnect)
+            {
+                checks.Add(new SystemHealthCheckDto(
+                    Name: "PostGIS and pgvector extensions",
+                    Category: "Persistence",
+                    Status: "Skipped",
+                    Critical: true,
+                    Detail: "Extension validation was skipped because PostgreSQL is unavailable."));
+
+                return false;
+            }
+
+            await AddDatabaseExtensionCheckAsync(checks, cancellationToken);
+            return true;
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            stopwatch.Stop();
+            checks.Add(new SystemHealthCheckDto(
+                Name: "PostgreSQL connection",
+                Category: "Persistence",
+                Status: "Unavailable",
+                Critical: true,
+                Detail: $"Database check failed: {exception.GetType().Name}.",
+                LatencyMilliseconds: stopwatch.ElapsedMilliseconds));
+
+            checks.Add(new SystemHealthCheckDto(
+                Name: "PostGIS and pgvector extensions",
+                Category: "Persistence",
+                Status: "Skipped",
+                Critical: true,
+                Detail: "Extension validation was skipped because PostgreSQL is unavailable."));
+
+            return false;
+        }
+    }
+
+    private async Task AddDatabaseExtensionCheckAsync(
+        List<SystemHealthCheckDto> checks,
+        CancellationToken cancellationToken)
+    {
+        var stopwatch = Stopwatch.StartNew();
+
+        try
+        {
+            var extensions = await dbContext.Database
+                .SqlQueryRaw<string>(
+                    """
+                    SELECT extname AS "Value"
+                    FROM pg_extension
+                    WHERE extname IN ('postgis', 'vector')
+                    """)
+                .ToListAsync(cancellationToken);
+            stopwatch.Stop();
+
+            var hasPostgis = extensions.Contains("postgis", StringComparer.OrdinalIgnoreCase);
+            var hasVector = extensions.Contains("vector", StringComparer.OrdinalIgnoreCase);
+            var status = hasPostgis && hasVector ? "Healthy" : "Degraded";
+
+            checks.Add(new SystemHealthCheckDto(
+                Name: "PostGIS and pgvector extensions",
+                Category: "Persistence",
+                Status: status,
+                Critical: true,
+                Detail: status == "Healthy"
+                    ? "PostGIS and pgvector extensions are installed."
+                    : $"Installed extensions: {string.Join(", ", extensions.DefaultIfEmpty("none"))}.",
+                LatencyMilliseconds: stopwatch.ElapsedMilliseconds));
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            stopwatch.Stop();
+            checks.Add(new SystemHealthCheckDto(
+                Name: "PostGIS and pgvector extensions",
+                Category: "Persistence",
+                Status: "Degraded",
+                Critical: true,
+                Detail: $"Extension validation failed: {exception.GetType().Name}.",
+                LatencyMilliseconds: stopwatch.ElapsedMilliseconds));
+        }
+    }
+
+    private void AddStorageCheck(List<SystemHealthCheckDto> checks)
+    {
+        var provider = configuration["FileStorage:Provider"] ?? "Local";
+        var rootPath = ResolveConfiguredPath(
+            environment.ContentRootPath,
+            configuration["FileStorage:RootPath"],
+            "../../var/uploads/incident-media");
+
+        if (string.Equals(provider, "S3", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(provider, "MinIO", StringComparison.OrdinalIgnoreCase))
+        {
+            var bucket = configuration["S3Storage:BucketName"];
+            var endpoint = configuration["S3Storage:Endpoint"];
+
+            checks.Add(new SystemHealthCheckDto(
+                Name: "Object storage",
+                Category: "Storage",
+                Status: string.IsNullOrWhiteSpace(bucket) || string.IsNullOrWhiteSpace(endpoint)
+                    ? "Degraded"
+                    : "Configured",
+                Critical: true,
+                Detail: string.IsNullOrWhiteSpace(bucket) || string.IsNullOrWhiteSpace(endpoint)
+                    ? "S3-compatible storage is selected but endpoint or bucket configuration is missing."
+                    : $"S3-compatible storage is configured for bucket '{bucket}'."));
+
+            return;
+        }
+
+        checks.Add(new SystemHealthCheckDto(
+            Name: "Object storage",
+            Category: "Storage",
+            Status: Directory.Exists(rootPath) ? "Healthy" : "Degraded",
+            Critical: true,
+            Detail: Directory.Exists(rootPath)
+                ? "Local incident media storage path exists."
+                : "Local incident media storage path does not exist yet."));
+    }
+
+    private void AddConfiguredIntegrationChecks(List<SystemHealthCheckDto> checks)
+    {
+        AddConfiguredIntegrationCheck(
+            checks,
+            name: "Redis cache",
+            category: "Cache",
+            enabled: configuration.GetValue<bool>("Redis:Enabled"),
+            configuredDetail: "Redis is enabled for cached read models and forecasting responses.",
+            disabledDetail: "Redis is disabled; the API uses direct backend reads.");
+        AddConfiguredIntegrationCheck(
+            checks,
+            name: "RabbitMQ queues",
+            category: "Messaging",
+            enabled: configuration.GetValue<bool>("RabbitMq:Enabled"),
+            configuredDetail: "RabbitMQ is enabled for incident processing and data import jobs.",
+            disabledDetail: "RabbitMQ is disabled; background workers can use configured fallbacks.");
+        AddConfiguredIntegrationCheck(
+            checks,
+            name: "Python AI service",
+            category: "AI",
+            enabled: configuration.GetValue<bool>("AiService:Enabled"),
+            configuredDetail: $"AI service is configured at {configuration["AiService:BaseUrl"] ?? "the configured base URL"}.",
+            disabledDetail: "AI service is disabled; deterministic fallback analyzers are active.");
+        AddConfiguredIntegrationCheck(
+            checks,
+            name: "Weather API",
+            category: "External API",
+            enabled: configuration.GetValue<bool>("Weather:Enabled"),
+            configuredDetail: "Weather context is enabled for controlled triage workflows.",
+            disabledDetail: "Weather context is disabled by configuration.");
+        AddConfiguredIntegrationCheck(
+            checks,
+            name: "Nominatim geocoding",
+            category: "External API",
+            enabled: configuration.GetValue<bool>("Nominatim:Enabled"),
+            configuredDetail: "Geocoding is enabled for address search and reverse lookup.",
+            disabledDetail: "Geocoding is disabled by configuration.");
+    }
+
+    private static void AddConfiguredIntegrationCheck(
+        List<SystemHealthCheckDto> checks,
+        string name,
+        string category,
+        bool enabled,
+        string configuredDetail,
+        string disabledDetail)
+    {
+        checks.Add(new SystemHealthCheckDto(
+            Name: name,
+            Category: category,
+            Status: enabled ? "Configured" : "Disabled",
+            Critical: false,
+            Detail: enabled ? configuredDetail : disabledDetail));
+    }
+
+    private static string ResolveOverallStatus(IReadOnlyCollection<SystemHealthCheckDto> checks)
+    {
+        if (checks.Any(check => check.Critical && check.Status is "Unavailable"))
+        {
+            return "Unhealthy";
+        }
+
+        if (checks.Any(check => check.Status is "Degraded" or "Skipped"))
+        {
+            return "Degraded";
+        }
+
+        return "Healthy";
+    }
+
+    private static string ResolveConfiguredPath(
+        string contentRootPath,
+        string? configuredPath,
+        string defaultPath)
+    {
+        var path = string.IsNullOrWhiteSpace(configuredPath)
+            ? defaultPath
+            : configuredPath.Trim();
+
+        return Path.IsPathRooted(path)
+            ? Path.GetFullPath(path)
+            : Path.GetFullPath(Path.Combine(contentRootPath, path));
     }
 }

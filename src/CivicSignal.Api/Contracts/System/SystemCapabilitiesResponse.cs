@@ -34,3 +34,18 @@ public sealed record SystemRuntimePolicyResponse(
     bool RabbitMqEnabled,
     bool WeatherEnabled,
     bool GeocodingEnabled);
+
+public sealed record SystemHealthResponse(
+    string Service,
+    string Environment,
+    string Status,
+    DateTimeOffset GeneratedAt,
+    IReadOnlyCollection<SystemHealthCheckDto> Checks);
+
+public sealed record SystemHealthCheckDto(
+    string Name,
+    string Category,
+    string Status,
+    bool Critical,
+    string Detail,
+    long? LatencyMilliseconds = null);

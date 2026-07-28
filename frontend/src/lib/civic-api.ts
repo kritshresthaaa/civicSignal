@@ -315,6 +315,23 @@ export type SystemRuntimePolicyResponse = {
   weatherEnabled: boolean;
 };
 
+export type SystemHealthCheckDto = {
+  category: string;
+  critical: boolean;
+  detail: string;
+  latencyMilliseconds?: number | null;
+  name: string;
+  status: string;
+};
+
+export type SystemHealthResponse = {
+  checks: SystemHealthCheckDto[];
+  environment: string;
+  generatedAt: string;
+  service: string;
+  status: string;
+};
+
 export type GeocodingResultDto = {
   addressLine?: string | null;
   category?: string | null;
@@ -674,6 +691,10 @@ export async function getSystemIntegrations() {
 
 export async function getSystemRuntimePolicy() {
   return requestJson<SystemRuntimePolicyResponse>("/api/system/runtime-policy");
+}
+
+export async function getSystemHealth() {
+  return requestJson<SystemHealthResponse>("/api/system/health");
 }
 
 export async function searchLocations(query: string) {

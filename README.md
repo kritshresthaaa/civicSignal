@@ -77,6 +77,20 @@ Set `RUN_POSTGRES_TESTCONTAINERS=true` before `dotnet test` to run the PostgreSQ
 
 When the API is running in Development, Swagger UI is available at `http://localhost:5020/swagger`.
 
+Operational smoke checks:
+
+```bash
+curl http://localhost:5020/api/system/health
+curl http://localhost:5020/health/ready
+```
+
+Load-test scripts live in `load-tests/k6/`:
+
+```bash
+k6 run load-tests/k6/public-report-flow.js
+k6 run load-tests/k6/staff-read-flow.js
+```
+
 ## Continuous Integration
 
 GitHub Actions runs on pushes to `main`, `feature/**`, and `fix/**`, plus pull requests into `main`.

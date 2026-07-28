@@ -1,6 +1,6 @@
 # Requirements Implementation Audit
 
-Last reviewed: 2026-07-25
+Last reviewed: 2026-07-28
 
 ## Implemented or Mostly Implemented
 
@@ -17,6 +17,7 @@ Last reviewed: 2026-07-25
 - Repeatable AI service evaluation runner for the live FastAPI inference boundary, including Hugging Face-backed text triage, semantic embedding duplicate metrics, forecasting metrics, runtime mode, model names, model versions, dependency readiness, and optional media endpoint coverage.
 - Browser notification delivery for citizen status alerts, including permission handling and notification click-through to the public tracking page.
 - Offline queued citizen report submissions using IndexedDB, including queued media files and automatic sync when the browser comes back online.
+- Operational health checks through `/api/system/health`, request correlation IDs through `X-Correlation-ID`, frontend health visibility in Settings, and starter k6 load-test scripts for public and staff flows.
 
 ## Fixed Static Runtime Data
 
@@ -28,8 +29,8 @@ Last reviewed: 2026-07-25
 
 ## Still Missing or Partial
 
-- Production observability: OpenTelemetry tracing, Prometheus/Grafana dashboards, structured trace correlation, and model monitoring are not fully implemented.
-- Load testing: no k6/Locust load-test scripts or published latency/throughput results yet.
+- Production observability: request correlation and health checks exist, but OpenTelemetry tracing, Prometheus/Grafana dashboards, and model monitoring are not fully implemented.
+- Load testing: starter k6 public/staff scripts exist, but no published latency/throughput results from a deployment target yet.
 - Cloud deployment: GitHub Actions CI exists, but no Terraform/Bicep/cloud runbook, managed service configuration, image publishing, or deployed environment exists yet.
 - AI quality: deterministic baseline and Hugging Face text/embedding service reports exist, but reviewed audio/image fixtures, WER/vision precision, tuned duplicate thresholds, and model-card style results still need to be published.
 - Notifications: browser notifications are implemented, but external SMS/email providers and true server-side Web Push subscriptions are not wired.

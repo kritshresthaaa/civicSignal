@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import {
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
   Database,
+  HeartPulse,
   KeyRound,
   Loader2,
   RadioTower,
@@ -17,14 +21,17 @@ import {
 } from "lucide-react";
 import {
   CivicApiError,
+  getSystemHealth,
   getSystemIntegrations,
   getSystemRuntimePolicy,
+  type SystemHealthCheckDto,
+  type SystemHealthResponse,
   type SystemIntegrationStatusDto,
   type SystemRuntimePolicyResponse,
 } from "@/lib/civic-api";
 import { PageHeader, Panel, ScoreBar, SegmentedControl } from "@/components/ui-kit";
 
-const settingsTabs = ["Access", "AI Rules", "Integrations"] as const;
+const settingsTabs = ["Access", "AI Rules", "Integrations", "Health"] as const;
 type LoadState = "loading" | "live" | "error";
 
 export function SettingsPanel() {
@@ -32,6 +39,7 @@ export function SettingsPanel() {
   const [state, setState] = useState<LoadState>("loading");
   const [message, setMessage] = useState("Loading backend runtime configuration...");
   const [integrations, setIntegrations] = useState<SystemIntegrationStatusDto[]>([]);
+  const [health, setHealth] = useState<SystemHealthResponse | null>(null);
   const [policy, setPolicy] = useState<SystemRuntimePolicyResponse | null>(null);
   const [remoteEmbeddings, setRemoteEmbeddings] = useState(false);
   const [weatherContext, setWeatherContext] = useState(false);
@@ -50,8 +58,10 @@ export function SettingsPanel() {
         getSystemIntegrations(),
         getSystemRuntimePolicy(),
       ]);
+      const loadedHealth = await getSystemHealth();
 
       setIntegrations(loadedIntegrations.integrations);
+      setHealth(loadedHealth);
       setPolicy(loadedPolicy);
       applyPolicy(loadedPolicy, setDuplicateScore, setRadius, setTimeWindow, setRemoteEmbeddings, setWeatherContext, setQueueProcessing);
       setDraftState("Controls mirror backend configuration.");
@@ -59,6 +69,7 @@ export function SettingsPanel() {
       setMessage(`${loadedIntegrations.integrations.length} integration states loaded from ${loadedIntegrations.service}.`);
     } catch (error) {
       setIntegrations([]);
+      setHealth(null);
       setPolicy(null);
       setState("error");
       setMessage(error instanceof CivicApiError ? error.message : "Could not load backend runtime configuration.");
@@ -114,7 +125,7 @@ export function SettingsPanel() {
           <SettingTile icon={<Shield className="h-4 w-4" />} label="Access model" value="Identity + JWT + cookies" />
           <SettingTile icon={<SlidersHorizontal className="h-4 w-4" />} label="Duplicate threshold" value={`${duplicateScore}%`} />
           <SettingTile icon={<Database className="h-4 w-4" />} label="Embedding dimensions" value={policy ? String(policy.textEmbeddingDimensions) : "Loading"} />
-          <SettingTile icon={<ServerCog className="h-4 w-4" />} label="Upload limit" value={policy ? formatUploadLimit(policy.maxUploadBytes) : "Loading"} />
+          <SettingTile icon={<HeartPulse className="h-4 w-4" />} label="System health" value={health?.status ?? "Loading"} />
         </div>
       </Panel>
 
@@ -257,6 +268,43 @@ export function SettingsPanel() {
           )}
         </Panel>
       ) : null}
+
+      {tab === "Health" ? (
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <Panel
+            title="Operational Health"
+            description={
+              health
+                ? `${health.service} reported ${health.status.toLowerCase()} at ${formatDateTime(health.generatedAt)}.`
+                : "Health checks are unavailable until the backend API responds."
+            }
+          >
+            {health?.checks.length ? (
+              <div className="grid gap-3">
+                {health.checks.map((check) => (
+                  <HealthCheckRow check={check} key={`${check.category}-${check.name}`} />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-md border border-civic-border bg-civic-raised p-4 text-sm font-semibold text-civic-muted">
+                Run the backend and refresh this page to inspect database, storage, cache, queue, AI, and external API readiness.
+              </div>
+            )}
+          </Panel>
+
+          <Panel title="Demo Readiness" description="Use this panel before exposing the app to another device or recording a portfolio walkthrough.">
+            <div className="grid gap-3">
+              <ReadinessItem active={health?.status === "Healthy"} label="Backend is healthy" />
+              <ReadinessItem active={Boolean(health?.checks.some((check) => check.name === "PostgreSQL connection" && check.status === "Healthy"))} label="Database is reachable" />
+              <ReadinessItem active={Boolean(health?.checks.some((check) => check.name === "PostGIS and pgvector extensions" && check.status === "Healthy"))} label="Geo/vector extensions are ready" />
+              <ReadinessItem active={Boolean(health?.checks.some((check) => check.name === "Request correlation"))} label="Trace correlation is enabled" />
+            </div>
+            <div className="mt-4 rounded-md border border-civic-border bg-civic-soft p-3 text-sm leading-6 text-civic-muted">
+              Use `/api/system/health` for backend smoke checks and `/health/ready` for deployment readiness probes.
+            </div>
+          </Panel>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -347,6 +395,75 @@ function SettingTile({ icon, label, value }: { icon: ReactNode; label: string; v
   );
 }
 
+function HealthCheckRow({ check }: { check: SystemHealthCheckDto }) {
+  return (
+    <div className="grid gap-3 rounded-md border border-civic-border bg-civic-raised p-4 md:grid-cols-[220px_minmax(0,1fr)_150px]">
+      <div>
+        <div className="flex items-center gap-2 font-semibold text-civic-heading">
+          <span className={healthStatusIconClass(check.status)}>
+            {healthStatusIcon(check.status)}
+          </span>
+          {check.name}
+        </div>
+        <div className="mt-1 text-xs font-semibold uppercase text-civic-muted">{check.category}</div>
+      </div>
+      <p className="text-sm leading-6 text-civic-muted">
+        {check.detail}
+        {typeof check.latencyMilliseconds === "number" ? (
+          <span className="ml-2 inline-flex items-center gap-1 font-semibold text-civic-primary">
+            <Activity className="h-3.5 w-3.5" aria-hidden="true" />
+            {check.latencyMilliseconds} ms
+          </span>
+        ) : null}
+      </p>
+      <span className={`inline-flex h-8 items-center justify-center rounded-md px-3 text-sm font-semibold ${healthStatusClass(check.status)}`}>
+        {check.critical ? "Critical" : "Optional"} - {check.status}
+      </span>
+    </div>
+  );
+}
+
+function ReadinessItem({ active, label }: { active: boolean; label: string }) {
+  return (
+    <div className="flex items-center justify-between rounded-md border border-civic-border bg-civic-raised p-3">
+      <span className="text-sm font-semibold text-civic-heading">{label}</span>
+      {active ? (
+        <CheckCircle2 className="h-4 w-4 text-civic-primary" aria-hidden="true" />
+      ) : (
+        <AlertTriangle className="h-4 w-4 text-status-review-text" aria-hidden="true" />
+      )}
+    </div>
+  );
+}
+
+function healthStatusIcon(status: string) {
+  if (status === "Healthy" || status === "Configured") {
+    return <CheckCircle2 className="h-4 w-4" aria-hidden="true" />;
+  }
+
+  return <AlertTriangle className="h-4 w-4" aria-hidden="true" />;
+}
+
+function healthStatusIconClass(status: string) {
+  if (status === "Healthy" || status === "Configured") {
+    return "text-civic-primary";
+  }
+
+  return "text-status-review-text";
+}
+
+function healthStatusClass(status: string) {
+  if (status === "Healthy" || status === "Configured") {
+    return "bg-status-triaged text-status-triaged-text";
+  }
+
+  if (status === "Disabled" || status === "Skipped") {
+    return "bg-status-submitted text-status-submitted-text";
+  }
+
+  return "bg-status-review text-status-review-text";
+}
+
 function integrationStatusClass(status: string, enabled: boolean) {
   if (enabled) {
     return "bg-status-triaged text-status-triaged-text";
@@ -359,10 +476,9 @@ function integrationStatusClass(status: string, enabled: boolean) {
   return "bg-status-submitted text-status-submitted-text";
 }
 
-function formatUploadLimit(bytes: number) {
-  if (bytes >= 1024 * 1024) {
-    return `${Math.round(bytes / (1024 * 1024))} MB`;
-  }
-
-  return `${Math.round(bytes / 1024)} KB`;
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
 }

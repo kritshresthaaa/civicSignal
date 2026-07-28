@@ -178,6 +178,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+var requestCorrelationLogger = loggerFactory.CreateLogger("CivicSignal.RequestCorrelation");
 
 var mediaRootPath = ResolveMediaRootPath(
     app.Environment.ContentRootPath,
@@ -211,6 +213,8 @@ app.UseExceptionHandler(errorApp =>
         });
     });
 });
+
+UseRequestCorrelation(app, requestCorrelationLogger);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -518,6 +522,34 @@ static IApplicationBuilder UseSecurityHeaders(IApplicationBuilder app)
         headers.TryAdd("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 
         await next();
+    });
+}
+
+static IApplicationBuilder UseRequestCorrelation(IApplicationBuilder app, ILogger logger)
+{
+    return app.Use(async (context, next) =>
+    {
+        const string correlationHeader = "X-Correlation-ID";
+        var correlationId = context.Request.Headers[correlationHeader].FirstOrDefault();
+
+        if (string.IsNullOrWhiteSpace(correlationId))
+        {
+            correlationId = context.TraceIdentifier;
+        }
+
+        context.Response.OnStarting(() =>
+        {
+            context.Response.Headers[correlationHeader] = correlationId;
+            return Task.CompletedTask;
+        });
+
+        using (logger.BeginScope(new Dictionary<string, object>
+        {
+            ["CorrelationId"] = correlationId
+        }))
+        {
+            await next();
+        }
     });
 }
 
