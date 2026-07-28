@@ -30,7 +30,7 @@ Last reviewed: 2026-07-25
 
 - Production observability: OpenTelemetry tracing, Prometheus/Grafana dashboards, structured trace correlation, and model monitoring are not fully implemented.
 - Load testing: no k6/Locust load-test scripts or published latency/throughput results yet.
-- Cloud deployment: no Terraform/Bicep/cloud runbook, managed service configuration, CI/CD pipeline, or deployed environment.
+- Cloud deployment: GitHub Actions CI exists, but no Terraform/Bicep/cloud runbook, managed service configuration, image publishing, or deployed environment exists yet.
 - AI quality: deterministic baseline and Hugging Face text/embedding service reports exist, but reviewed audio/image fixtures, WER/vision precision, tuned duplicate thresholds, and model-card style results still need to be published.
 - Notifications: browser notifications are implemented, but external SMS/email providers and true server-side Web Push subscriptions are not wired.
 - Offline PWA depth: draft recovery and in-app queued submission sync exist, but service-worker background sync is still a future hardening step.

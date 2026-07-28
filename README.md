@@ -77,6 +77,19 @@ Set `RUN_POSTGRES_TESTCONTAINERS=true` before `dotnet test` to run the PostgreSQ
 
 When the API is running in Development, Swagger UI is available at `http://localhost:5020/swagger`.
 
+## Continuous Integration
+
+GitHub Actions runs on pushes to `main`, `feature/**`, and `fix/**`, plus pull requests into `main`.
+
+The CI workflow checks:
+
+- Frontend `npm ci`, lint, typecheck, and production build.
+- .NET restore, Release build, and tests with Docker/Testcontainers disabled by default.
+- Python AI-service contract tests in deterministic mode.
+- Repeatable evaluation baseline and evaluation unit tests.
+
+The workflow also includes a manual `workflow_dispatch` container-build job for Docker Compose service builds before deployment work.
+
 ## Backend Demo Flow
 
 Fast Docker path:
